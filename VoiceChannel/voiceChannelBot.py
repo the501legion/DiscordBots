@@ -8,7 +8,7 @@ bot = commands.Bot(command_prefix='!')
 @bot.event
 async def on_ready():
     global VOICE_CREATE
-    VOICE_CREATE = bot.get_channel(id=0) # ID des Channels
+    VOICE_CREATE = bot.get_channel(id=0) # channel ID
 
 @bot.event
 async def on_voice_state_update(member, before, after):
