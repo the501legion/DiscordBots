@@ -20,12 +20,19 @@ LIVE_SERVER = 419549814376759297
 TEST_SERVER = 426001973246951424
 
 # channel ids for roles
-ROLE_CHANNEL = 609860364309495819
+ROLE_CHANNEL = 425748476379529227
 ROLE_CHANNEL_TEST = 763103210155147264
 
 # roles which will be given by emote
-ROLES = [ 763105108841332766, 763105158078922763, 763105190765002783 ]
-EMOTES = [ "😂", "🏞", "😗" ]
+ROLES = [ 763374681025150986, 763374893572030464, 763374952304082964, 763375031874748449, 763375085704577034,
+ 763375132831121409, 763375172996562945, 763375221201567774 ]
+EMOTES = [ ":boomerang:", ":art:", ":clapper:", ":book:", ":speaking_head:", ":rocket:", ":game_die:", ":performing_arts:" ]
+TEXT = [ ":boomerang: um Sportler:in zu werden.", ":art: um Künstler:in zu werden.", ":clapper: um Cineast:in zu werden.",
+ ":book: wenn Du zum Buchclub gehören möchtest.", ":speaking_head: wenn Du das #kämmerlein sehen möchtest.", ":rocket: wenn Du mit among us spielen möchtest.",
+  ":game_die: wenn Du Tabletop Simulator spielen möchtest.", ":performing_arts: wenn Du Dich für Pen & Paper interessierst." ]
+ROLES_TEST = [ 763105108841332766, 763105158078922763, 763105190765002783 ]
+EMOTES_TEST = [ "🪃", "🎨", "🎬" ]
+TEXT_TEST = [ "Rolle A für :boomerang:", "Rolle B für :art:", "Rolle C für :clapper:" ]
 
 # database connection
 DB_HOST = config.DB_HOST
@@ -78,28 +85,28 @@ async def on_ready():
     await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name='twitch.tv/princesspaperplane', type=discord.ActivityType.watching))
     print('------')
 
-    #await updateReactionMsg(ROLE_CHANNEL)
-    await updateReactionMsg(ROLE_CHANNEL_TEST)
+    #await updateReactionMsg(ROLE_CHANNEL, ROLES, EMOTES, TEXT)
+    await updateReactionMsg(ROLE_CHANNEL_TEST, ROLES_TEST, EMOTES_TEST, TEXT_TEST)
 
 # update role message and add reactions
 @bot.event
-async def updateReactionMsg(roleChannel):
+async def updateReactionMsg(roleChannel, roles, emotes, text):
     channel = bot.get_channel(id=roleChannel)
     server = channel.guild
-    msg = await channel.history().get(id=channel.last_message_id)
+    msg = await channel.history().get(author__name='Paperbot')
 
     if msg != None:
         for emote in msg.reactions:
             if emote.me == True:
                 await msg.remove_reaction(emote.emoji, bot.user)
     else:
-        msg = await channel.send("Hier stehen bald alle Streamer-Rollen, die ihr euch mit dem jeweiligen Emotes als Reaktion geben und wieder nehmen könnt.")
+        msg = await channel.send("Hier stehen bald alle Streamer-Rollen, die ihr euch mit dem jeweiligen Emotes als Reaktion geben und wieder nehmen könnt. :boomerang:")
 
     string = "Hier stehen alle Rollen, die ihr euch mit den jeweiligen Emotes als Reaktion geben und wieder nehmen könnt:\n"
-    for x in range(0, len(ROLES)):
-        role = server.get_role(role_id=ROLES[x])
-        await msg.add_reaction(EMOTES[x])
-        string = string + "\n- Rolle " + role.name + " für " + EMOTES[x]
+    for x in range(0, len(roles)):
+        role = server.get_role(role_id=roles[x])
+        await msg.add_reaction(emotes[x])
+        string = string + "\n- " + text[x]
 
     await msg.edit(content=string)
 
@@ -120,24 +127,29 @@ async def handleRoleReactions(payload):
         emoji = payload.emoji
         server = bot.get_guild(id=payload.guild_id)
         user = server.get_member(user_id=payload.user_id)
+        roles = []
+        emotes = []
+
+        if payload.channel_id == ROLE_CHANNEL:
+            roles = ROLES
+            emotes = EMOTES
+        elif payload.channel_id == ROLE_CHANNEL_TEST:
+            roles = ROLES_TEST
+            emotes = EMOTES_TEST
 
         if user == bot.user:
             return
 
-        print(emoji.name)
-        print(server.id)
-
         i = -1
-        for x in range(0, len(ROLES)):
-            if EMOTES[x] == emoji.name:
+        for x in range(0, len(roles)):
+            if emotes[x] == emoji.name:
                 i = x
                 break
 
         if i == -1:
             return
 
-        role = server.get_role(role_id=ROLES[i])
-        log("Role: " + role.name)
+        role = server.get_role(role_id=roles[i])
         if role in user.roles:
             log("Role " + role.name + " removed from " + user.name)
             await user.remove_roles(role)
@@ -159,7 +171,6 @@ async def on_message(message):
         return
 
     string = "[" + server.name + "] " + author.name + " (#" + channel.name + "): " + message.content
-    log(string)
 
     db = dbConnect()
     cur = db.cursor()
@@ -183,7 +194,7 @@ async def on_message(message):
             if server.id == TEST_SERVER:
                 expTime = 0
 
-            # has cooldown expired?
+            # has cooldown (60s) expired?
             if expTime + 60 <= time.time():
                 addedExp = 15 + randint(0, 10)
                 exp = exp + addedExp
@@ -223,6 +234,7 @@ async def on_message(message):
                         for row in rows:
                             role = server.get_role(role_id=int(row[0]))
                             if role in author.roles:
+                                log("Remove " + author.name + " old role " + role.name)
                                 await author.remove_roles(role)
 
                 # update user in database with new XP (+ level)
@@ -244,6 +256,10 @@ async def on_message(message):
         # handle commands !rank / !rang to print current XP
         if "!rank" in message.content or "!rang" in message.content:
             if server.id == LIVE_SERVER:
+                # only allow !rank / !rang in #bod_spam
+                if channel.id != 760861542735806485:
+                    return
+
                 cur.execute("SELECT exp, level, name FROM user_info WHERE id = %s", (author.id,))
             if server.id == TEST_SERVER:
                 cur.execute("SELECT exp, level, name FROM user_info_test WHERE id = %s", (author.id,))
@@ -298,7 +314,6 @@ async def on_message(message):
                     if i != 0:
                         content = content + ", "
                     content = content + str(randint(1, dice))
-                log("content2: " + str(content))
                 await channel.send(content=content)
             except Exception as e:
                 log("Exception in !w: " + str(e))
