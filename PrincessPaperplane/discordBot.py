@@ -202,29 +202,28 @@ async def on_message(message):
                     if server.id == TEST_SERVER:
                         cur.execute("SELECT rewardRole FROM level_reward_test WHERE rewardLevel = %s", (level,))
 
-                    if server.id == TEST_SERVER:
-                        await channel.send(author.mention + " Du bist ein Level aufgestiegen! Nun bist du auf Level " + str(level) + "!")
+                    await channel.send(author.mention + " Du bist ein Level aufgestiegen! Nun bist du auf Level " + str(level) + "!")
 
-                        if cur.rowcount > 0:
-                            role = server.get_role(role_id=int(cur.fetchone()[0]))
+                    if cur.rowcount > 0:
+                        role = server.get_role(role_id=int(cur.fetchone()[0]))
 
-                            # give user new role as reward
-                            if role not in author.roles:
-                                log("Assign " + author.name + " new role " + role.name)
-                                await author.add_roles(role)
-                            await channel.send(author.mention + " Du erhältst den Rang " + role.name + "!")
+                        # give user new role as reward
+                        if role not in author.roles:
+                            log("Assign " + author.name + " new role " + role.name)
+                            await author.add_roles(role)
+                        await channel.send(author.mention + " Du erhältst den Rang " + role.name + "!")
 
-                            # remove old reward-roles
-                            if server.id == LIVE_SERVER:
-                                cur.execute("SELECT rewardRole FROM level_reward WHERE rewardLevel < %s", (level,))
-                            if server.id == TEST_SERVER:
-                                cur.execute("SELECT rewardRole FROM level_reward_test WHERE rewardLevel < %s", (level,))
+                        # remove old reward-roles
+                        if server.id == LIVE_SERVER:
+                            cur.execute("SELECT rewardRole FROM level_reward WHERE rewardLevel < %s", (level,))
+                        if server.id == TEST_SERVER:
+                            cur.execute("SELECT rewardRole FROM level_reward_test WHERE rewardLevel < %s", (level,))
 
-                            rows = cur.fetchall()
-                            for row in rows:
-                                role = server.get_role(role_id=int(row[0]))
-                                if role in author.roles:
-                                    await author.remove_roles(role)
+                        rows = cur.fetchall()
+                        for row in rows:
+                            role = server.get_role(role_id=int(row[0]))
+                            if role in author.roles:
+                                await author.remove_roles(role)
 
                 # update user in database with new XP (+ level)
                 if server.id == LIVE_SERVER:
