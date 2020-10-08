@@ -21,12 +21,19 @@ TEST_SERVER = 426001973246951424
 
 # channel ids for roles
 ROLE_CHANNEL = 425748476379529227
-ROLE_CHANNEL_TEST = 763103210155147264
+ROLE_CHANNEL_TEST = 763491543163731980
+
+# channel ids for level ups
+LEVEL_CHANNEL = 760861542735806485
+LEVEL_CHANNEL_TEST = 763491543163731980
+
+# user ids which will be ignored by level + commands
+IGNORE_LIST = [ 392783651248799754 ]
 
 # roles which will be given by emote
 ROLES = [ 763374681025150986, 763374893572030464, 763374952304082964, 763375031874748449, 763375085704577034,
  763375132831121409, 763375172996562945, 763375221201567774 ]
-EMOTES = [ ":boomerang:", ":art:", ":clapper:", ":book:", ":speaking_head:", ":rocket:", ":game_die:", ":performing_arts:" ]
+EMOTES = [ "🪃", "🎨", "🎬", "📖", "🗣️", "🚀", "🎲", "🎭" ]
 TEXT = [ ":boomerang: um Sportler:in zu werden.", ":art: um Künstler:in zu werden.", ":clapper: um Cineast:in zu werden.",
  ":book: wenn Du zum Buchclub gehören möchtest.", ":speaking_head: wenn Du das #kämmerlein sehen möchtest.", ":rocket: wenn Du mit among us spielen möchtest.",
   ":game_die: wenn Du Tabletop Simulator spielen möchtest.", ":performing_arts: wenn Du Dich für Pen & Paper interessierst." ]
@@ -85,7 +92,7 @@ async def on_ready():
     await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name='twitch.tv/princesspaperplane', type=discord.ActivityType.watching))
     print('------')
 
-    #await updateReactionMsg(ROLE_CHANNEL, ROLES, EMOTES, TEXT)
+    await updateReactionMsg(ROLE_CHANNEL, ROLES, EMOTES, TEXT)
     await updateReactionMsg(ROLE_CHANNEL_TEST, ROLES_TEST, EMOTES_TEST, TEXT_TEST)
 
 # update role message and add reactions
@@ -93,7 +100,11 @@ async def on_ready():
 async def updateReactionMsg(roleChannel, roles, emotes, text):
     channel = bot.get_channel(id=roleChannel)
     server = channel.guild
-    msg = await channel.history().get(author__name='Paperbot')
+    msg = None
+
+    async for message in channel.history(limit=200):
+        if message.author == bot.user:
+            msg = message
 
     if msg != None:
         for emote in msg.reactions:
@@ -105,8 +116,10 @@ async def updateReactionMsg(roleChannel, roles, emotes, text):
     string = "Hier stehen alle Rollen, die ihr euch mit den jeweiligen Emotes als Reaktion geben und wieder nehmen könnt:\n"
     for x in range(0, len(roles)):
         role = server.get_role(role_id=roles[x])
+        str = 'Rolle %s, %s' % (roles[x], emotes[x])
+        print(str)
         await msg.add_reaction(emotes[x])
-        string = string + "\n- " + text[x]
+        string = string + "\n" + text[x]
 
     await msg.edit(content=string)
 
@@ -164,6 +177,14 @@ async def on_message(message):
     channel = message.channel
     server = message.guild
 
+    if author.id in IGNORE_LIST:
+        return
+
+    if server.id == LIVE_SERVER:
+        levelChannel = bot.get_channel(id=LEVEL_CHANNEL)
+    if server.id == TEST_SERVER:
+        levelChannel = bot.get_channel(id=LEVEL_CHANNEL_TEST)
+
     if author.id == bot.user.id:
         return
 
@@ -213,7 +234,8 @@ async def on_message(message):
                     if server.id == TEST_SERVER:
                         cur.execute("SELECT rewardRole FROM level_reward_test WHERE rewardLevel = %s", (level,))
 
-                    await channel.send(author.mention + " Du bist ein Level aufgestiegen! Nun bist du auf Level " + str(level) + "!")
+
+                    await levelChannel.send(author.mention + " Du bist ein Level aufgestiegen! Nun bist du auf Level " + str(level) + "!")
 
                     if cur.rowcount > 0:
                         role = server.get_role(role_id=int(cur.fetchone()[0]))
@@ -222,13 +244,13 @@ async def on_message(message):
                         if role not in author.roles:
                             log("Assign " + author.name + " new role " + role.name)
                             await author.add_roles(role)
-                        await channel.send(author.mention + " Du erhältst den Rang " + role.name + "!")
+                        await levelChannel.send(author.mention + " Du erhältst den Rang " + role.name + "!")
 
                         # remove old reward-roles
                         if server.id == LIVE_SERVER:
-                            cur.execute("SELECT rewardRole FROM level_reward WHERE rewardLevel < %s", (level,))
+                            cur.execute("SELECT rewardRole FROM level_reward WHERE rewardLevel < %s AND rewardLevel > 1", (level,))
                         if server.id == TEST_SERVER:
-                            cur.execute("SELECT rewardRole FROM level_reward_test WHERE rewardLevel < %s", (level,))
+                            cur.execute("SELECT rewardRole FROM level_reward_test WHERE rewardLevel < %s AND rewardLevel > 1", (level,))
 
                         rows = cur.fetchall()
                         for row in rows:
@@ -242,6 +264,7 @@ async def on_message(message):
                     cur.execute("UPDATE user_info SET name = %s, exp = %s, expTime = %s, level = %s, avatar_url = %s WHERE id = %s", (author.name, exp, time.time(), level, author.avatar_url, author.id,))
                 if server.id == TEST_SERVER:
                     cur.execute("UPDATE user_info_test SET name = %s, exp = %s, expTime = %s, level = %s, avatar_url = %s WHERE id = %s", (author.name, exp, time.time(), level, author.avatar_url, author.id,))
+
         # add user to database if missing
         else:
             exp = 15 + randint(0, 10)
@@ -281,9 +304,22 @@ async def on_message(message):
             nextLevelUp = await getLevelUp(level)
             expLeft = nextLevelUp - exp
 
-            # print current XP, level and missing XP for next levelup
-            description = "Aktuelle XP: %d - Aktuelles Level: %d - Verbleibende XP bis Level %d: %d" % (exp, level, nextLevel, expLeft)
-            await channel.send(content=description)
+            # generate image with stats
+            ext = ""
+            if server.id == TEST_SERVER:
+                ext = "&test"
+            url = "https://501-legion.de/princesspaperplane/generateLevel.php?user=%s&time=%s%s" % (author.id, time.time(), ext)
+
+            # embed current XP, level and missing XP for next levelup
+            title = "Dein aktuelles Level: %d" % (level)
+            description = "Aktuelle XP: %d\nVerbleibende XP bis Level %d: %d" % (exp, nextLevel, expLeft)
+            colour = author.top_role.colour
+
+            embed = discord.Embed(title=title, description=description, colour=colour)
+            embed.set_author(name=author.name, icon_url=author.avatar_url_as(format="png"))
+            embed.set_image(url=url)
+
+            await channel.send(embed=embed)
 
         # handle command !w to roll a dice
         if "w" == message.content[1]:
