@@ -99,7 +99,7 @@ async def on_ready():
     print('------')
 
     await updateReactionMsg(ROLE_CHANNEL, ROLES, EMOTES, TEXT)
-    # await updateReactionMsg(ROLE_CHANNEL_TEST, ROLES_TEST, EMOTES_TEST, TEXT_TEST)
+    await updateReactionMsg(ROLE_CHANNEL_TEST, ROLES_TEST, EMOTES_TEST, TEXT_TEST)
 
 # update role message and add reactions
 @bot.event
