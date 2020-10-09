@@ -289,11 +289,12 @@ async def on_message(message):
             row = cur.fetchone()
 
             if cur.rowcount == 0:
+                exp = 0
                 if server.id == LIVE_SERVER:
                     cur.execute("INSERT INTO user_info (`id`, `name`, `exp`, `expTime`, `avatar_url`) VALUES (%s, %s, %s, %s, %s)", (author.id, author.name, exp, time.time(), author.avatar_url, ))
                     cur.execute("SELECT exp, level, name FROM user_info WHERE id = %s", (author.id,))
                 if server.id == TEST_SERVER:
-                    cur.execute("INSERT INTO user_info_test (`id`, `name`, `exp`, `expTime`, `avatar_url`) VALUES (%s, %s, %s, %s, %s)", (author.id, author.name, exp, time.time(), author.avatar_url,))
+                    cur.execute("INSERT INTO user_info_test (`id`, `name`, `exp`, `expTime`, `avatar_url`) VALUES (%s, %s, %s, %s, %s)", (author.id, author.name, exp, time.time(), author.avatar_url, ))
                     cur.execute("SELECT exp, level, name FROM user_info_test WHERE id = %s", (author.id,))
                 row = cur.fetchone()
 
