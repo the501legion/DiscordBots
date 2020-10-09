@@ -33,6 +33,12 @@ IGNORE_LIST = [ 392783651248799754 ]
 # roles which will be given by emote
 ROLES = [ 763374681025150986, 763374893572030464, 763374952304082964, 763375031874748449, 763375085704577034,
  763375132831121409, 763375172996562945, 763375221201567774 ]
+
+# level requirements for roles
+ROLES_LEVEL = {
+    763872914654625803: 5
+}
+
 EMOTES = [ "🪃", "🎨", "🎬", "📖", "🗣️", "🚀", "🎲", "🎭" ]
 TEXT = [ ":boomerang: um Sportler:in zu werden.", ":art: um Künstler:in zu werden.", ":clapper: um Cineast:in zu werden.",
  ":book: wenn Du zum Buchclub gehören möchtest.", ":speaking_head: wenn Du das #kämmerlein sehen möchtest.", ":rocket: wenn Du mit among us spielen möchtest.",
@@ -167,8 +173,20 @@ async def handleRoleReactions(payload):
             log("Role " + role.name + " removed from " + user.name)
             await user.remove_roles(role)
         else:
-            log("Role " + role.name + " assigned to " + user.name)
-            await user.add_roles(role)
+            if role in ROLES_LEVEL:
+                db = dbConnect()
+                cur = db.cursor()
+                db.autocommit(True)
+
+                level = cur.execute("SELECT level FROM user_info WHERE id = %", (user.user_id,)).fetchone()[0]
+                if level >= ROLES_LEVEL.get(role):
+                    log("Role " + role.name + " with min-level " + level + " assigned to " + user.name)
+                    await user.add_roles(role)
+
+                db.close()
+            else:
+                log("Role " + role.name + " assigned to " + user.name)
+                await user.add_roles(role)
 
 # check new message
 @bot.event
