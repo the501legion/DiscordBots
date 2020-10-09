@@ -30,15 +30,15 @@ LEVEL_CHANNEL_TEST = 763491543163731980
 # user ids which will be ignored by level + commands
 IGNORE_LIST = [ 392783651248799754 ]
 
+# level requirements for roles
+ROLES_LEVEL = {
+    763105108841332766: 5,
+    763375085704577034 : 5
+}
+
 # roles which will be given by emote
 ROLES = [ 763374681025150986, 763374893572030464, 763374952304082964, 763375031874748449, 763375085704577034,
  763375132831121409, 763375172996562945, 763375221201567774 ]
-
-# level requirements for roles
-ROLES_LEVEL = {
-    763872914654625803: 5
-}
-
 EMOTES = [ "🪃", "🎨", "🎬", "📖", "🗣️", "🚀", "🎲", "🎭" ]
 TEXT = [ ":boomerang: um Sportler:in zu werden.", ":art: um Künstler:in zu werden.", ":clapper: um Cineast:in zu werden.",
  ":book: wenn Du zum Buchclub gehören möchtest.", ":speaking_head: wenn Du das #kämmerlein sehen möchtest.", ":rocket: wenn Du mit among us spielen möchtest.",
@@ -122,10 +122,13 @@ async def updateReactionMsg(roleChannel, roles, emotes, text):
     string = "Hier stehen alle Rollen, die ihr euch mit den jeweiligen Emotes als Reaktion geben und wieder nehmen könnt:\n"
     for x in range(0, len(roles)):
         role = server.get_role(role_id=roles[x])
+
         str = 'Rolle %s, %s' % (roles[x], emotes[x])
-        print(str)
         await msg.add_reaction(emotes[x])
+
         string = string + "\n" + text[x]
+        if roles[x] in ROLES_LEVEL:
+            string = "%s (mindestens Level %d)" % (string, ROLES_LEVEL.get(roles[x]))
 
     await msg.edit(content=string)
 
@@ -148,16 +151,26 @@ async def handleRoleReactions(payload):
         user = server.get_member(user_id=payload.user_id)
         roles = []
         emotes = []
+        level = 0
+
+        if user == bot.user:
+            return
+
+        db = dbConnect()
+        cur = db.cursor()
+        db.autocommit(True)
 
         if payload.channel_id == ROLE_CHANNEL:
             roles = ROLES
             emotes = EMOTES
+            cur.execute("SELECT level FROM user_info WHERE id = %s", (user.id,))
         elif payload.channel_id == ROLE_CHANNEL_TEST:
             roles = ROLES_TEST
             emotes = EMOTES_TEST
-
-        if user == bot.user:
-            return
+            cur.execute("SELECT level FROM user_info_test WHERE id = %s", (user.id,))
+        if cur.rowcount > 0:
+            level = cur.fetchone()[0]
+        db.close()
 
         i = -1
         for x in range(0, len(roles)):
@@ -166,24 +179,20 @@ async def handleRoleReactions(payload):
                 break
 
         if i == -1:
+            log("No emote found")
             return
 
         role = server.get_role(role_id=roles[i])
+        log("Role %s request from %s (Level %d)" % (role.name, user.name, level))
+
         if role in user.roles:
             log("Role " + role.name + " removed from " + user.name)
             await user.remove_roles(role)
         else:
-            if role in ROLES_LEVEL:
-                db = dbConnect()
-                cur = db.cursor()
-                db.autocommit(True)
-
-                level = cur.execute("SELECT level FROM user_info WHERE id = %", (user.user_id,)).fetchone()[0]
-                if level >= ROLES_LEVEL.get(role):
+            if roles[i] in ROLES_LEVEL:
+                if level >= ROLES_LEVEL.get(roles[i]):
                     log("Role " + role.name + " with min-level " + level + " assigned to " + user.name)
                     await user.add_roles(role)
-
-                db.close()
             else:
                 log("Role " + role.name + " assigned to " + user.name)
                 await user.add_roles(role)
