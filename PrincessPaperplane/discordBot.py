@@ -261,9 +261,6 @@ async def on_message(message):
                     if server.id == TEST_SERVER:
                         cur.execute("SELECT rewardRole FROM level_reward_test WHERE rewardLevel = %s", (level,))
 
-
-                    await levelChannel.send(author.mention + " Du bist ein Level aufgestiegen! Nun bist du auf Level " + str(level) + "!")
-
                     if cur.rowcount > 0:
                         role = server.get_role(role_id=int(cur.fetchone()[0]))
 
