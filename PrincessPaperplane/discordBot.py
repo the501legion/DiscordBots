@@ -156,6 +156,11 @@ async def handleRoleReactions(payload):
         if user == bot.user:
             return
 
+        if server.id == LIVE_SERVER:
+            levelChannel = bot.get_channel(id=LEVEL_CHANNEL)
+        if server.id == TEST_SERVER:
+            levelChannel = bot.get_channel(id=LEVEL_CHANNEL_TEST)
+
         db = dbConnect()
         cur = db.cursor()
         db.autocommit(True)
@@ -193,6 +198,8 @@ async def handleRoleReactions(payload):
                 if level >= ROLES_LEVEL.get(roles[i]):
                     log("Role " + role.name + " with min-level " + level + " assigned to " + user.name)
                     await user.add_roles(role)
+                else:
+                    await levelChannel.send(user.name + " du erfüllst nicht das notwendige Level " + level + " für die Role " + role.name)
             else:
                 log("Role " + role.name + " assigned to " + user.name)
                 await user.add_roles(role)
