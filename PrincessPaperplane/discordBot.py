@@ -191,7 +191,7 @@ async def handleRoleReactions(payload):
         else:
             if roles[i] in ROLES_LEVEL:
                 if level >= ROLES_LEVEL.get(roles[i]):
-                    log("Role " + role.name + " with min-level " + level + " assigned to " + user.name)
+                    log("Role " + role.name + " with min-level " + str(level) + " assigned to " + user.name)
                     await user.add_roles(role)
             else:
                 log("Role " + role.name + " assigned to " + user.name)
@@ -268,7 +268,8 @@ async def on_message(message):
                         if role not in author.roles:
                             log("Assign " + author.name + " new role " + role.name)
                             await author.add_roles(role)
-                        await levelChannel.send(author.mention + " Du erhältst den Rang " + role.name + "!")
+
+                        await levelChannel.send(author.mention + " Du hast eine neue Stufe erreicht und erhältst den neuen Rang " + role.name + "!")
 
                         # remove old reward-roles
                         if server.id == LIVE_SERVER:
