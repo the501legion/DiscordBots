@@ -33,7 +33,7 @@ IGNORE_LIST = [ 392783651248799754 ]
 # level requirements for roles
 ROLES_LEVEL = {
     763105108841332766: 5,
-    763375085704577034 : 5
+    763375085704577034: 5
 }
 
 # roles which will be given by emote
@@ -77,6 +77,67 @@ def log(text):
         log("Exception in log: " + str(e))
         pass
 
+
+async def initial_role_check():
+    db = None
+
+    try:
+        msg = None
+
+        db = dbConnect()
+        cur = db.cursor()
+        db.autocommit(True)
+        cur.execute("SELECT * FROM user_info")
+
+        channel = bot.get_channel(id=ROLE_CHANNEL)
+        async for message in channel.history(limit=200):
+            if message.author == bot.user:
+                msg = message
+
+        server = bot.get_guild(id=LIVE_SERVER)
+        ids = cur.fetchall()
+        reacts = msg.reactions
+
+        # first check - undetected reactions
+        for react in reacts:
+
+            # get all user who have reacted
+            react_users = await react.users().flatten()
+            for react_user in react_users:
+                cur.execute("SELECT id FROM user_info WHERE EXISTS(SELECT id FROM user_info WHERE id = ?)",
+                            (react_user.id,))
+
+                if cur.rowcount is not 0:
+                    continue
+
+                cur.execute(
+                    "INSERT INTO user_info (`id`, `name`, `exp`, `expTime`, `avatar_url`) VALUES (%s, %s, %s, %s, %s)",
+                    (react_user.id, react_user.name, 0, time.time(), react_user.avatar_url,))
+
+        # second check - all users in database
+        for user_id in ids:
+            user = server.get_member(user_id=user_id[1])
+
+            # iterate over all the reactions/ emojis
+            for react in reacts:
+                role_id = ROLES[EMOTES.index(react.emoji)]
+
+                # get all user who have reacted
+                react_users = await react.users().flatten()
+                if user in react_users:
+                    # has reacted/ check role
+                    await user.add_roles(role_id)
+                    continue
+
+                # no reaction/ check role
+                await user.remove_roles(role_id)
+
+    except Exception as e:
+        log(e)
+
+    finally:
+        db.close()
+
 # start bot
 @bot.event
 async def on_ready():
@@ -94,6 +155,10 @@ async def on_ready():
         print("- " + guild.name)
         if guild.id == TEST_SERVER:
             bot.user.name = bot.user.name + " (Test)"
+
+    print('------')
+    print('Start initial role check')
+    await initial_role_check()
 
     await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name='twitch.tv/princesspaperplane', type=discord.ActivityType.watching))
     print('------')
