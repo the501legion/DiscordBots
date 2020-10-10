@@ -32,8 +32,8 @@ IGNORE_LIST = [ 392783651248799754 ]
 
 # level requirements for roles
 ROLES_LEVEL = {
-    763105108841332766: 5,
-    763375085704577034: 5
+    763105108841332766 : 5,
+    763375085704577034 : 5
 }
 
 # roles which will be given by emote
@@ -261,10 +261,10 @@ async def handleRoleReactions(payload):
         else:
             if roles[i] in ROLES_LEVEL:
                 if level >= ROLES_LEVEL.get(roles[i]):
-                    log("Role " + role.name + " with min-level " + str(level) + " assigned to " + user.name)
+                    log("Role " + role.name + " with min-level " + str(ROLES_LEVEL.get(roles[i])) + " assigned to " + user.name)
                     await user.add_roles(role)
                 else:
-                    await levelChannel.send(user.name + " du erfüllst nicht das notwendige Level " + level + " für die Role " + role.name)
+                    await levelChannel.send(user.mention + " Du erfüllst das notwendige Level (" + str(level) + " statt " + str(ROLES_LEVEL.get(roles[i])) + ") für die Rolle " + role.name + " nicht!")
             else:
                 log("Role " + role.name + " assigned to " + user.name)
                 await user.add_roles(role)
