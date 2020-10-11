@@ -325,10 +325,12 @@ async def on_message(message):
     await bot.process_commands(message)
 
 #Used as decorator
-def is_allowed_command_channel():
+def is_in_channel(channel_id : int):
+    """Used as decorator that checks if bot can post in this channel
+    """
     #Define predicate to be checked
     async def predicate(ctx):
-        if ctx.server.id == LIVE_SERVER and ctx.channel.id != 760861542735806485: # only allow !rank / !rang in #bod_spam
+        if ctx.server.id == LIVE_SERVER and ctx.channel.id != channel_id: # only allow !rank / !rang in #bod_spam
             return False
         else:
             return True
@@ -336,8 +338,14 @@ def is_allowed_command_channel():
     return commands.check(predicate)
 
 @commands.command(aliases=['rank', 'rang'])
-@is_allowed_command_channel()
-async def cmd_rank(ctx : commands.Context, member : typing.Optional[discord.Member]):
+@is_in_channel(760861542735806485) 
+async def cmd_rank(ctx: commands.Context, member: typing.Optional[discord.Member]):
+    """Handles rank command
+
+    Args:
+        ctx (commands.Context): [description]
+        member (typing.Optional[discord.Member]): Member argument
+    """
     channel = ctx.channel
     server = ctx.guild
     author = ctx.author
