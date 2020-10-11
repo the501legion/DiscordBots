@@ -353,7 +353,7 @@ async def cmd_rank(ctx: commands.Context, member: typing.Optional[discord.Member
     db = dbConnect()
     cur = db.cursor()
     db.autocommit(True)
-    
+
     if server.id == LIVE_SERVER:
         cur.execute("SELECT exp, level, name FROM user_info WHERE id = %s", (author.id,))
     if server.id == TEST_SERVER:
