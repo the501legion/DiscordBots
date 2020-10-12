@@ -8,6 +8,8 @@ from discord.ext import commands
 import MySQLdb
 import time
 from random import randint
+import re  # Regex
+import typing
 
 # create bot
 bot = commands.Bot(command_prefix='!')
@@ -47,6 +49,10 @@ ROLES_TEST = [ 763105108841332766, 763105158078922763, 763105190765002783 ]
 EMOTES_TEST = [ "🪃", "🎨", "🎬" ]
 TEXT_TEST = [ "Rolle A für :boomerang:", "Rolle B für :art:", "Rolle C für :clapper:" ]
 
+prefixes_regex = '(' + "|".join(bot.command_prefix) + ')'
+DICE_CMD_REGEX = re.compile(r"^({prefix})([w,d])".format(prefix=prefixes_regex))
+
+
 # database connection
 DB_HOST = config.DB_HOST
 DB_USER = config.DB_USER
@@ -77,6 +83,10 @@ def log(text):
         log("Exception in log: " + str(e))
         pass
 
+def add_commands():
+    bot.add_command(cmd_rank)
+    bot.add_command(cmd_dice)
+
 # start bot
 @bot.event
 async def on_ready():
@@ -100,6 +110,8 @@ async def on_ready():
 
     await updateReactionMsg(ROLE_CHANNEL, ROLES, EMOTES, TEXT)
     await updateReactionMsg(ROLE_CHANNEL_TEST, ROLES_TEST, EMOTES_TEST, TEXT_TEST)
+
+    add_commands() # Add commands
 
 # update role message and add reactions
 @bot.event
@@ -304,89 +316,97 @@ async def on_message(message):
                 cur.execute("INSERT INTO user_info (`id`, `name`, `exp`, `expTime`, `avatar_url`) VALUES (%s, %s, %s, %s, %s)", (author.id, author.name, exp, time.time(), author.avatar_url, ))
             if server.id == TEST_SERVER:
                 cur.execute("INSERT INTO user_info_test (`id`, `name`, `exp`, `expTime`, `avatar_url`) VALUES (%s, %s, %s, %s, %s)", (author.id, author.name, exp, time.time(), author.avatar_url,))
+    
+    # Handle commands
+    match = DICE_CMD_REGEX.match(message.content)
+    if bool(match):
+        cmd_length = len(match.group(1)) + len(match.group(2))
+        message.content = message.content[:cmd_length] + " " + message.content[cmd_length:]
+    await bot.process_commands(message)
 
-    # commands (starting with !)
-    if message.content[0] == "!":
+#Used as decorator
+def is_in_channel(channel_id : int):
+    """Used as decorator that checks if bot can post in this channel
+    """
+    #Define predicate to be checked
+    async def predicate(ctx):
+        if ctx.server.id == LIVE_SERVER and ctx.channel.id != channel_id: # only allow !rank / !rang in #bod_spam
+            return False
+        else:
+            return True
+    # Return as check, use with decorator
+    return commands.check(predicate)
 
-        # handle commands !rank / !rang to print current XP
-        if "!rank" in message.content or "!rang" in message.content:
-            if server.id == LIVE_SERVER:
-                # only allow !rank / !rang in #bod_spam
-                if channel.id != 760861542735806485:
-                    return
+@commands.command(aliases=['rank', 'rang'])
+@is_in_channel(760861542735806485) 
+async def cmd_rank(ctx: commands.Context, member: typing.Optional[discord.Member]):
+    """Handles rank command
 
-                cur.execute("SELECT exp, level, name FROM user_info WHERE id = %s", (author.id,))
-            if server.id == TEST_SERVER:
-                cur.execute("SELECT exp, level, name FROM user_info_test WHERE id = %s", (author.id,))
-            row = cur.fetchone()
+    Args:
+        ctx (commands.Context): [description]
+        member (typing.Optional[discord.Member]): Member argument
+    """
+    channel = ctx.channel
+    server = ctx.guild
+    author = ctx.author
+    
+    db = dbConnect()
+    cur = db.cursor()
+    db.autocommit(True)
 
-            if cur.rowcount == 0:
-                exp = 0
-                if server.id == LIVE_SERVER:
-                    cur.execute("INSERT INTO user_info (`id`, `name`, `exp`, `expTime`, `avatar_url`) VALUES (%s, %s, %s, %s, %s)", (author.id, author.name, exp, time.time(), author.avatar_url, ))
-                    cur.execute("SELECT exp, level, name FROM user_info WHERE id = %s", (author.id,))
-                if server.id == TEST_SERVER:
-                    cur.execute("INSERT INTO user_info_test (`id`, `name`, `exp`, `expTime`, `avatar_url`) VALUES (%s, %s, %s, %s, %s)", (author.id, author.name, exp, time.time(), author.avatar_url, ))
-                    cur.execute("SELECT exp, level, name FROM user_info_test WHERE id = %s", (author.id,))
-                row = cur.fetchone()
+    if server.id == LIVE_SERVER:
+        cur.execute("SELECT exp, level, name FROM user_info WHERE id = %s", (author.id,))
+    if server.id == TEST_SERVER:
+        cur.execute("SELECT exp, level, name FROM user_info_test WHERE id = %s", (author.id,))
+    row = cur.fetchone()
 
-            # store current variables
-            exp = row[0]
-            level = row[1]
-            nextLevel = level + 1
-            nextLevelUp = await getLevelUp(level)
-            expLeft = nextLevelUp - exp
+    if cur.rowcount == 0:
+        exp = 0
+        if server.id == LIVE_SERVER:
+            cur.execute("INSERT INTO user_info (`id`, `name`, `exp`, `expTime`, `avatar_url`) VALUES (%s, %s, %s, %s, %s)", (author.id, author.name, exp, time.time(), author.avatar_url, ))
+            cur.execute("SELECT exp, level, name FROM user_info WHERE id = %s", (author.id,))
+        if server.id == TEST_SERVER:
+            cur.execute("INSERT INTO user_info_test (`id`, `name`, `exp`, `expTime`, `avatar_url`) VALUES (%s, %s, %s, %s, %s)", (author.id, author.name, exp, time.time(), author.avatar_url, ))
+            cur.execute("SELECT exp, level, name FROM user_info_test WHERE id = %s", (author.id,))
+        row = cur.fetchone()
 
-            # generate image with stats
-            ext = ""
-            if server.id == TEST_SERVER:
-                ext = "&test"
-            url = "https://501-legion.de/princesspaperplane/generateLevel.php?user=%s&time=%s%s" % (author.id, time.time(), ext)
+    # store current variables
+    exp = row[0]
+    level = row[1]
+    nextLevel = level + 1
+    nextLevelUp = await getLevelUp(level)
+    expLeft = nextLevelUp - exp
 
-            # embed current XP, level and missing XP for next levelup
-            title = "Dein aktuelles Level: %d" % (level)
-            description = "Aktuelle XP: %d\nVerbleibende XP bis Level %d: %d" % (exp, nextLevel, expLeft)
-            colour = author.top_role.colour
+    # generate image with stats
+    ext = ""
+    if server.id == TEST_SERVER:
+        ext = "&test"
+    url = "https://501-legion.de/princesspaperplane/generateLevel.php?user=%s&time=%s%s" % (author.id, time.time(), ext)
 
-            embed = discord.Embed(title=title, description=description, colour=colour)
-            embed.set_author(name=author.name, icon_url=author.avatar_url_as(format="png"))
-            embed.set_image(url=url)
+    # embed current XP, level and missing XP for next levelup
+    title = "Dein aktuelles Level: %d" % (level)
+    description = "Aktuelle XP: %d\nVerbleibende XP bis Level %d: %d" % (exp, nextLevel, expLeft)
+    colour = author.top_role.colour
 
-            await channel.send(embed=embed)
+    embed = discord.Embed(title=title, description=description, colour=colour)
+    embed.set_author(name=author.name, icon_url=author.avatar_url_as(format="png"))
+    embed.set_image(url=url)
 
-        # handle command !w to roll a dice
-        if "w" == message.content[1]:
-            # check if !w-command is correct
-            try:
-                # dice type like W6
-                dice = message.content.split('!w')
+    await channel.send(embed=embed)
+            
 
-                # multiple dices
-                multiply = dice[1].split('x')
+@commands.command(aliases=['w','d'])
+async def cmd_dice(ctx: commands.Context, dice: int, amount: typing.Optional[int] = 1):
+    author = ctx.author
 
-                # if no x after dice type is given, use only one dice
-                if len(multiply) == 1:
-                    dice = multiply[0]
-                    multiply = 1
+    # print rolled dices
+    content = author.mention + " Du hast folgende Zahlen gewürfelt: "
 
-                # retrieve dice count if x is given
-                else:
-                    dice = multiply[0]
-                    multiply = multiply[1]
-
-                # print rolled dices
-                content = author.mention + " Du hast folgende Zahlen gewürfelt: "
-                dice = int(dice)
-                multiply = int(multiply)
-
-                for i in range(0, multiply):
-                    if i != 0:
-                        content = content + ", "
-                    content = content + str(randint(1, dice))
-                await channel.send(content=content)
-            except Exception as e:
-                log("Exception in !w: " + str(e))
-                pass
+    for i in range(0, amount):
+        if i != 0:
+            content = content + ", "
+        content = content + str(randint(1, dice))
+    await ctx.channel.send(content=content)
 
 # get needed XP to next levelup
 @bot.event
