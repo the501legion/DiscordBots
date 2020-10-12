@@ -52,7 +52,6 @@ TEXT_TEST = [ "Rolle A für :boomerang:", "Rolle B für :art:", "Rolle C für :c
 prefixes_regex = '(' + "|".join(bot.command_prefix) + ')'
 DICE_CMD_REGEX = re.compile(r"^({prefix})([w,d])".format(prefix=prefixes_regex))
 
-
 # database connection
 DB_HOST = config.DB_HOST
 DB_USER = config.DB_USER
@@ -83,10 +82,6 @@ def log(text):
         log("Exception in log: " + str(e))
         pass
 
-def add_commands():
-    bot.add_command(cmd_rank)
-    bot.add_command(cmd_dice)
-
 # start bot
 @bot.event
 async def on_ready():
@@ -110,8 +105,6 @@ async def on_ready():
 
     await updateReactionMsg(ROLE_CHANNEL, ROLES, EMOTES, TEXT)
     await updateReactionMsg(ROLE_CHANNEL_TEST, ROLES_TEST, EMOTES_TEST, TEXT_TEST)
-
-    add_commands() # Add commands
 
 # update role message and add reactions
 @bot.event
@@ -168,11 +161,6 @@ async def handleRoleReactions(payload):
         if user == bot.user:
             return
 
-        if server.id == LIVE_SERVER:
-            levelChannel = bot.get_channel(id=LEVEL_CHANNEL)
-        if server.id == TEST_SERVER:
-            levelChannel = bot.get_channel(id=LEVEL_CHANNEL_TEST)
-
         db = dbConnect()
         cur = db.cursor()
         db.autocommit(True)
@@ -181,10 +169,12 @@ async def handleRoleReactions(payload):
             roles = ROLES
             emotes = EMOTES
             cur.execute("SELECT level FROM user_info WHERE id = %s", (user.id,))
+            levelChannel = bot.get_channel(id=LEVEL_CHANNEL)
         elif payload.channel_id == ROLE_CHANNEL_TEST:
             roles = ROLES_TEST
             emotes = EMOTES_TEST
             cur.execute("SELECT level FROM user_info_test WHERE id = %s", (user.id,))
+            levelChannel = bot.get_channel(id=LEVEL_CHANNEL_TEST)
         if cur.rowcount > 0:
             level = cur.fetchone()[0]
         db.close()
@@ -324,21 +314,22 @@ async def on_message(message):
         message.content = message.content[:cmd_length] + " " + message.content[cmd_length:]
     await bot.process_commands(message)
 
-#Used as decorator
+# Used as decorator
 def is_in_channel(channel_id : int):
     """Used as decorator that checks if bot can post in this channel
     """
     #Define predicate to be checked
     async def predicate(ctx):
-        if ctx.server.id == LIVE_SERVER and ctx.channel.id != channel_id: # only allow !rank / !rang in #bod_spam
+        if ctx.guild.id == LIVE_SERVER and ctx.channel.id != channel_id: # only allow !rank / !rang in #bod_spam
             return False
         else:
             return True
+
     # Return as check, use with decorator
     return commands.check(predicate)
 
-@commands.command(aliases=['rank', 'rang'])
-@is_in_channel(760861542735806485) 
+@bot.command(aliases=['rank', 'rang'])
+@is_in_channel(760861542735806485)
 async def cmd_rank(ctx: commands.Context, member: typing.Optional[discord.Member]):
     """Handles rank command
 
@@ -395,9 +386,19 @@ async def cmd_rank(ctx: commands.Context, member: typing.Optional[discord.Member
     await channel.send(embed=embed)
             
 
-@commands.command(aliases=['w','d'])
-async def cmd_dice(ctx: commands.Context, dice: int, amount: typing.Optional[int] = 1):
+@bot.command(aliases=['w','d'])
+async def cmd_dice(ctx: commands.Context, args):
     author = ctx.author
+
+    if 'x' in args:
+        dice = int(args.split('x')[0])
+        amount = int(args.split('x')[1])
+    else:
+        dice = int(args)
+        amount = 1
+
+    if dice < 1 or amount < 1:
+        return
 
     # print rolled dices
     content = author.mention + " Du hast folgende Zahlen gewürfelt: "
