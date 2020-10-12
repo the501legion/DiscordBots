@@ -1,15 +1,17 @@
-from discord.ext import commands
-import discord
-import typing
 import asyncio
-from typing import Optional
-from utility.checks import is_in_channel
-import configs.guild_config as guild_config
-import configs.aliases as aliases
-import configs.xp_config as xp_config
 import time
+import typing
 from random import randint
+from typing import Optional
+
+import configs.cmd_config as cmd_config
+import configs.guild_config as guild_config
+import configs.xp_config as xp_config
+import discord
+from discord.ext import commands
+from utility.checks import is_in_channel
 from utility.cogs_enum import Cogs
+
 
 class Rank(commands.Cog):
     def __init__(self, bot : commands.Bot):
@@ -133,7 +135,9 @@ class Rank(commands.Cog):
     def calc_xp(self) -> int:
         return self.base_xp + randint(*self.random_xp_range)
 
-    @commands.command(aliases=aliases.RANK['rank'])
+    ### Commands
+
+    @commands.command(aliases=cmd_config.ALIASES["rank"])
     @is_in_channel(760861542735806485)
     async def cmd_rank(self, ctx: commands.Context, member: Optional[discord.Member]):
         """Handles rank command

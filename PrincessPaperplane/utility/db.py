@@ -1,8 +1,10 @@
+import time
+
+import configs.db_config as db_config
+import configs.secret as secret
 import MySQLdb
 from discord.ext import commands
-import configs.secret as secret
-import configs.db_config as db_config
-import time
+
 
 class DB(commands.Cog):
     def __init__(self):

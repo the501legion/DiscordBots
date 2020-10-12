@@ -1,6 +1,9 @@
 #!/usr/bin/python3
 # coding=utf-8
 
+"""Guild settings
+"""
+
 # server ids
 LIVE_SERVER = 419549814376759297
 TEST_SERVER = 426001973246951424

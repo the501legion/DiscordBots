@@ -1,7 +1,8 @@
-from discord.ext import commands
-import configs.roles_config as roles_config
 import configs.guild_config as guild_config
+import configs.roles_config as roles_config
+from discord.ext import commands
 from utility.cogs_enum import Cogs
+
 
 class Roles(commands.Cog):
     def __init__(self, bot: commands.Bot):

@@ -1,6 +1,9 @@
 #!/usr/bin/python3
 # coding=utf-8
 
+"""Contains private information
+"""
+
 # Discord API key
 API_KEY = ""
 

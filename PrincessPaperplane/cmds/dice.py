@@ -1,14 +1,16 @@
 
-from discord.ext import commands
 import asyncio
-import configs.aliases as aliases
 from random import randint
+
+import configs.cmd_config as cmd_config
+from discord.ext import commands
+
 
 class Dice(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(aliases=aliases.DICE['dice'])
+    @commands.command(aliases=cmd_config.ALIASES["dice"])
     async def cmd_dice(self, ctx: commands.Context, args):
         author = ctx.author
 
