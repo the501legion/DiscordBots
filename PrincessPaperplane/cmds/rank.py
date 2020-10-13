@@ -1,6 +1,5 @@
 import asyncio
 import time
-import typing
 from random import randint
 from typing import Optional
 

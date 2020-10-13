@@ -2,9 +2,6 @@
 # coding=utf-8
 
 import re  # Regex
-import time
-import typing
-from random import randint
 
 # import modules
 import configs.secret as secret

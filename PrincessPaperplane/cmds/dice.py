@@ -1,10 +1,8 @@
 
-import asyncio
 from random import randint
 
 import configs.cmd_config as cmd_config
 from discord.ext import commands
-
 
 class Dice(commands.Cog):
     def __init__(self, bot: commands.Bot):
