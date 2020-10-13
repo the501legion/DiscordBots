@@ -29,8 +29,8 @@ def add_cogs():
     bot.add_cog(Roles(bot))
 add_cogs()
 
-DB = bot.get_cog(Cogs.DB)
-ROLES = bot.get_cog(Cogs.ROLES)
+DB : DB = bot.get_cog(Cogs.DB)
+ROLES : Roles = bot.get_cog(Cogs.ROLES)
 
 # Discord API key
 API_KEY = secret.API_KEY
@@ -59,8 +59,8 @@ async def on_ready():
     await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name='twitch.tv/princesspaperplane', type=discord.ActivityType.watching))
     print('------')
 
-    await ROLES.update_reaction_msg(guild_config.ROLE_CHANNEL, roles_config.ROLES, roles_config.EMOTES, roles_config.TEXT)
-    await ROLES.update_reaction_msg(guild_config.ROLE_CHANNEL_TEST, roles_config.ROLES_TEST, roles_config.EMOTES_TEST, roles_config.TEXT_TEST)
+    await ROLES.update_reaction_msg(guild_config.ROLE_CHANNEL, roles_config.EMOTE_ROLES)
+    await ROLES.update_reaction_msg(guild_config.ROLE_CHANNEL_TEST, roles_config.TEST_EMOTE_ROLES)
 
 @bot.event
 async def on_message(message):
@@ -75,4 +75,5 @@ async def handle_command(message):
         message.content = message.content[:cmd_length] + " " + message.content[cmd_length:]
     await bot.process_commands(message)
 
+# RUN BOT
 bot.run(API_KEY)

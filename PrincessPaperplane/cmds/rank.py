@@ -3,10 +3,10 @@ import time
 from random import randint
 from typing import Optional
 
-import configs.cmd_config as cmd_config
+from configs.cmd_config import STRINGS, ALIASES
 import configs.guild_config as guild_config
 import configs.xp_config as xp_config
-import discord
+from discord import Member, TextChannel, Guild, Message, Role, Embed
 from discord.ext import commands
 from utility.checks import Checks
 from utility.cogs_enum import Cogs
@@ -20,21 +20,22 @@ class Rank(commands.Cog):
         self.random_xp_range = xp_config.RANDOM_RANGE
 
     @commands.Cog.listener()
-    async def on_message(self, message: discord.Message):
+    async def on_message(self, message: Message):
         await self.handle_user_message_xp(message)
 
-    async def handle_user_message_xp(self, message: discord.Message) -> None:
-        author = message.author
-        channel = message.channel
-        guild = message.guild
+    async def handle_user_message_xp(self, message: Message) -> None:
+        author : Member = message.author
+        channel : TextChannel = message.channel
+        guild : Guild = message.guild
 
         if author.id in guild_config.IGNORE_LIST:
             return
 
+        level_channel : TextChannel
         if guild.id == guild_config.LIVE_SERVER:
-            levelChannel = self.bot.get_channel(id=guild_config.LEVEL_CHANNEL)
+            level_channel = self.bot.get_channel(id=guild_config.LEVEL_CHANNEL)
         if guild.id == guild_config.TEST_SERVER:
-            levelChannel = self.bot.get_channel(id=guild_config.LEVEL_CHANNEL_TEST)
+            level_channel = self.bot.get_channel(id=guild_config.LEVEL_CHANNEL_TEST)
 
         if author.id == self.bot.user.id:
             return
@@ -42,7 +43,7 @@ class Rank(commands.Cog):
         if message.content == "" or len(message.content) == 0:
             return
 
-        string = "[" + guild.name + "] " + author.name + " (#" + channel.name + "): " + message.content
+        string = "[" + guild.name + "] " + author.name + " (#" + channel.name + "): " + message.content #TODO: What is this for?
 
         db = self.DB.connect()
         cur = db.cursor()
@@ -93,7 +94,7 @@ class Rank(commands.Cog):
                                 self.DB.log("Assign " + author.name + " new role " + role.name)
                                 await author.add_roles(role)
 
-                            await levelChannel.send(author.mention + " Du hast eine neue Stufe erreicht und erhältst den neuen Rang " + role.name + "!")
+                            await level_channel.send(author.mention + " Du hast eine neue Stufe erreicht und erhältst den neuen Rang " + role.name + "!")
 
                             # remove old reward-roles
                             if guild.id == guild_config.LIVE_SERVER:
@@ -118,7 +119,7 @@ class Rank(commands.Cog):
             else:
                 self.add_user_to_db(cur, guild, author)
 
-    def add_user_to_db(self, cur, guild : discord.Guild, author: discord.Member) -> None:
+    def add_user_to_db(self, cur, guild : Guild, author: Member) -> None:
         exp = self.calc_xp_reward()
         if guild.id == guild_config.LIVE_SERVER:
             cur.execute("INSERT INTO user_info (`id`, `name`, `exp`, `expTime`, `avatar_url`) VALUES (%s, %s, %s, %s, %s)", (author.id, author.name, exp, time.time(), author.avatar_url, ))
@@ -136,18 +137,18 @@ class Rank(commands.Cog):
 
     ### Commands
 
-    @commands.command(aliases=cmd_config.ALIASES["rank"])
+    @commands.command(aliases=ALIASES.RANK.value)
     @Checks.is_channel(760861542735806485)
-    async def cmd_rank(self, ctx: commands.Context, member: Optional[discord.Member]) -> None:
+    async def cmd_rank(self, ctx: commands.Context, member: Optional[Member]) -> None:
         """Handles rank command
 
         Args:
             ctx (commands.Context): [description]
             member (typing.Optional[discord.Member]): Member argument
         """
-        channel = ctx.channel
-        guild = ctx.guild
-        author = ctx.author
+        channel : TextChannel = ctx.channel
+        guild : Guild = ctx.guild
+        author : Member = ctx.author
         
         db = self.DB.connect()
         cur = db.cursor()
@@ -176,23 +177,23 @@ class Rank(commands.Cog):
         embed = self.create_rank_display_embed(guild, author, level, exp)
         await channel.send(embed=embed)
 
-    def create_rank_display_embed(self, guild : discord.Guild, author: discord.Member, level : str, exp: str) -> discord.Embed:
+    def create_rank_display_embed(self, guild : Guild, author: Member, level : int, exp: int) -> Embed:
         # generate image with stats
         ext = ""
         if guild.id == guild_config.TEST_SERVER:
             ext = "&test"
-        url = cmd_config.RANK["IMAGE_GENERATOR_CONFIG"].format(AUTHOR_ID=author.id, TIME=time.time(), EXT=ext)
+        url = str(STRINGS.RANK_IMAGE_GENERATOR_URL).format(AUTHOR_ID=author.id, TIME=time.time(), EXT=ext)
 
         next_level = level + 1
         nextLevelUp = self.get_levelup_threshold(level)
         exp_left = nextLevelUp - exp
 
         # embed current XP, level and missing XP for next levelup
-        title = cmd_config.RANK["EMBED_TITLE"].format(LEVEL=level)
-        description = cmd_config.RANK["EMBBED_DESCRIPTION"].format(EXP=exp, NEXT_LEVEL=next_level, EXP_LEVEL=exp_left)
+        title = STRINGS.RANK_EMBED_TITLE.value.format(LEVEL=level)
+        description = STRINGS.RANK_EMBED_DESCRIPTION.value.format(EXP=exp, NEXT_LEVEL=next_level, EXP_LEVEL=exp_left)
         colour = author.top_role.colour
 
-        embed = discord.Embed(title=title, description=description, colour=colour)
+        embed = Embed(title=title, description=description, colour=colour)
         embed.set_author(name=author.name, icon_url=author.avatar_url_as(format="png"))
         embed.set_image(url=url)
 
