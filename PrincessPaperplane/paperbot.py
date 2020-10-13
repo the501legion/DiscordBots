@@ -7,6 +7,7 @@ import re  # Regex
 import configs.secret as secret
 import configs.guild_config as guild_config
 import configs.roles_config as roles_config
+import configs.cmd_config as cmd_config
 import discord
 import MySQLdb
 from discord.ext import commands
@@ -15,11 +16,10 @@ import utility.db
 from cmds.dice import Dice
 from cmds.rank import Rank
 from cmds.roles import Roles
-from utility.checks import is_channel
 from utility.cogs_enum import Cogs
 
 # create bot
-bot = commands.Bot(command_prefix='!')
+bot = commands.Bot(command_prefix=cmd_config.PREFIXES)
 
 # Add cogs
 def add_cogs():

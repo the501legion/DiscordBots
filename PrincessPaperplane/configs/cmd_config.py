@@ -1,4 +1,4 @@
-
+PREFIXES = ['!']
 
 ALIASES = {
 	"rank": ['rank', 'rang', 'level', 'lvl'],
