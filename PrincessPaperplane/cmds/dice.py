@@ -3,12 +3,13 @@ from random import randint
 
 import configs.cmd_config as cmd_config
 from discord.ext import commands
+from configs.cmd_config import STRINGS, ALIASES
 
 class Dice(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
 
-    @commands.command(aliases=cmd_config.ALIASES["dice"])
+    @commands.command(aliases=ALIASES.DICE.value)
     async def cmd_dice(self, ctx: commands.Context, args):
         author = ctx.author
 
@@ -23,7 +24,7 @@ class Dice(commands.Cog):
             return
 
         # print rolled dices
-        content = author.mention + " Du hast folgende Zahlen gewürfelt: "
+        content = STRINGS.DICE_RESULT.value.format(MENTION=author.mention)
 
         for i in range(0, amount):
             if i != 0:
