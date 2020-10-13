@@ -8,7 +8,7 @@ import configs.guild_config as guild_config
 import configs.xp_config as xp_config
 import discord
 from discord.ext import commands
-from utility.checks import is_in_channel
+from utility.checks import Checks
 from utility.cogs_enum import Cogs
 
 
@@ -68,7 +68,7 @@ class Rank(commands.Cog):
 
                 # has cooldown (60s) expired?
                 if expTime + 60 <= time.time():
-                    addedExp = self.calc_xp()
+                    addedExp = self.calc_xp_reward()
                     exp = exp + addedExp
 
                     levelUp = self.get_levelup_threshold(level)
@@ -119,7 +119,7 @@ class Rank(commands.Cog):
                 self.add_user_to_db(cur, guild, author)
 
     def add_user_to_db(self, cur, guild : discord.Guild, author: discord.Member) -> None:
-        exp = self.calc_xp()
+        exp = self.calc_xp_reward()
         if guild.id == guild_config.LIVE_SERVER:
             cur.execute("INSERT INTO user_info (`id`, `name`, `exp`, `expTime`, `avatar_url`) VALUES (%s, %s, %s, %s, %s)", (author.id, author.name, exp, time.time(), author.avatar_url, ))
         if guild.id == guild_config.TEST_SERVER:
@@ -131,14 +131,14 @@ class Rank(commands.Cog):
             levelUp = 5 * (currentLevel ** 2) + 50 * currentLevel + 100
         return levelUp
 
-    def calc_xp(self) -> int:
+    def calc_xp_reward(self) -> int:
         return self.base_xp + randint(*self.random_xp_range)
 
     ### Commands
 
     @commands.command(aliases=cmd_config.ALIASES["rank"])
-    @is_in_channel(760861542735806485)
-    async def cmd_rank(self, ctx: commands.Context, member: Optional[discord.Member]):
+    @Checks.is_channel(760861542735806485)
+    async def cmd_rank(self, ctx: commands.Context, member: Optional[discord.Member]) -> None:
         """Handles rank command
 
         Args:
@@ -146,25 +146,25 @@ class Rank(commands.Cog):
             member (typing.Optional[discord.Member]): Member argument
         """
         channel = ctx.channel
-        server = ctx.guild
+        guild = ctx.guild
         author = ctx.author
         
         db = self.DB.connect()
         cur = db.cursor()
         db.autocommit(True)
 
-        if server.id == guild_config.LIVE_SERVER:
+        if guild.id == guild_config.LIVE_SERVER:
             cur.execute("SELECT exp, level, name FROM user_info WHERE id = %s", (author.id,))
-        if server.id == guild_config.TEST_SERVER:
+        if guild.id == guild_config.TEST_SERVER:
             cur.execute("SELECT exp, level, name FROM user_info_test WHERE id = %s", (author.id,))
         row = cur.fetchone()
 
         if cur.rowcount == 0:
             exp = 0
-            if server.id == guild_config.LIVE_SERVER:
+            if guild.id == guild_config.LIVE_SERVER:
                 cur.execute("INSERT INTO user_info (`id`, `name`, `exp`, `expTime`, `avatar_url`) VALUES (%s, %s, %s, %s, %s)", (author.id, author.name, exp, time.time(), author.avatar_url, ))
                 cur.execute("SELECT exp, level, name FROM user_info WHERE id = %s", (author.id,))
-            if server.id == guild_config.TEST_SERVER:
+            if guild.id == guild_config.TEST_SERVER:
                 cur.execute("INSERT INTO user_info_test (`id`, `name`, `exp`, `expTime`, `avatar_url`) VALUES (%s, %s, %s, %s, %s)", (author.id, author.name, exp, time.time(), author.avatar_url, ))
                 cur.execute("SELECT exp, level, name FROM user_info_test WHERE id = %s", (author.id,))
             row = cur.fetchone()
@@ -172,23 +172,28 @@ class Rank(commands.Cog):
         # store current variables
         exp = row[0]
         level = row[1]
-        nextLevel = level + 1
-        nextLevelUp = self.get_levelup_threshold(level)
-        expLeft = nextLevelUp - exp
 
+        embed = self.create_rank_display_embed(guild, author, level, exp)
+        await channel.send(embed=embed)
+
+    def create_rank_display_embed(self, guild : discord.Guild, author: discord.Member, level : str, exp: str) -> discord.Embed:
         # generate image with stats
         ext = ""
-        if server.id == guild_config.TEST_SERVER:
+        if guild.id == guild_config.TEST_SERVER:
             ext = "&test"
-        url = "https://501-legion.de/princesspaperplane/generateLevel.php?user=%s&time=%s%s" % (author.id, time.time(), ext)
+        url = cmd_config.RANK["IMAGE_GENERATOR_CONFIG"].format(AUTHOR_ID=author.id, TIME=time.time(), EXT=ext)
+
+        next_level = level + 1
+        nextLevelUp = self.get_levelup_threshold(level)
+        exp_left = nextLevelUp - exp
 
         # embed current XP, level and missing XP for next levelup
-        title = "Dein aktuelles Level: %d" % (level)
-        description = "Aktuelle XP: %d\nVerbleibende XP bis Level %d: %d" % (exp, nextLevel, expLeft)
+        title = cmd_config.RANK["EMBED_TITLE"].format(LEVEL=level)
+        description = cmd_config.RANK["EMBBED_DESCRIPTION"].format(EXP=exp, NEXT_LEVEL=next_level, EXP_LEVEL=exp_left)
         colour = author.top_role.colour
 
         embed = discord.Embed(title=title, description=description, colour=colour)
         embed.set_author(name=author.name, icon_url=author.avatar_url_as(format="png"))
         embed.set_image(url=url)
 
-        await channel.send(embed=embed)
+        return embed

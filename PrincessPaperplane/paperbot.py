@@ -15,7 +15,7 @@ import utility.db
 from cmds.dice import Dice
 from cmds.rank import Rank
 from cmds.roles import Roles
-from utility.checks import is_in_channel
+from utility.checks import is_channel
 from utility.cogs_enum import Cogs
 
 # create bot
