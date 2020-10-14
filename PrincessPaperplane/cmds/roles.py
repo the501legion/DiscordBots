@@ -92,6 +92,7 @@ class Roles(commands.Cog):
             role = guild.get_role(role_id=chosen_emote_role.role_id)
             self.DB.log("Role %s request from %s (Level %d)" % (role.name, user.name, level))
 
+            role : Roles
             if role in user.roles:
                 self.DB.log("Role " + role.name + " removed from " + user.name)
                 await user.remove_roles(role)
@@ -107,6 +108,8 @@ class Roles(commands.Cog):
                     await user.add_roles(role)
 
 class EmoteRoleSettings():
+    """Encapsulates data for role reactions based on emotes
+    """
     def __init__(self, role_id: int, emote: str, text: str):
       self.role_id = role_id
       self.emote = emote
