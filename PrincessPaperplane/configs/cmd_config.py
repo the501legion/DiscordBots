@@ -7,6 +7,7 @@ class ALIASES(Enum):
 	RANK_TRACK = ['track']
 	RANK_TRACK_TOGGLE = ['toggle']
 	DICE = ['dice', 'w', 'd']
+	RANDOM = ['wahl', 'pick', 'choose', 'random']
 
 class STRINGS(Enum):
 	DICE_RESULT = "{MENTION} Du hast folgende Zahlen gewürfelt: " #Leave whitespace at end!

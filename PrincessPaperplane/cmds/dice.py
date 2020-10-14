@@ -31,3 +31,18 @@ class Dice(commands.Cog):
                 content = content + ", "
             content = content + str(randint(1, dice))
         await ctx.channel.send(content=content)
+
+    @commands.command(aliases=ALIASES.RANDOM.value)
+    async def cmd_random(self, ctx: commands.Context, *args: str):
+        """Wählt zufälliges Element aus
+
+        Args:
+            ctx (commands.Context): [description]
+        """
+
+        if args is None or args.count <= 0:
+            await ctx.send(f"{ctx.author.mention}, gib bitte ein paar Optionen an!")
+
+        choice = args[randint(0, args.count - 1)]
+        await ctx.send(f"{ctx.author.mention}, deine Zufallswahl: {choice}")
+                
