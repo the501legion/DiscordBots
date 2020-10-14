@@ -11,12 +11,13 @@ from discord.ext import commands
 from utility.checks import Checks
 from utility.cogs_enum import Cogs
 from utility.db import DB
+from utility.converters import BoolParser
 
 
 class Rank(commands.Cog):
     def __init__(self, bot : commands.Bot):
         self.bot = bot
-        self.DB : DB = bot.get_cog(Cogs.DB)
+        self.DB : DB = bot.get_cog(Cogs.DB.value)
         self.base_xp = xp_config.BASE
         self.random_xp_range = xp_config.RANDOM_RANGE
 
@@ -138,9 +139,9 @@ class Rank(commands.Cog):
 
     ### Commands
 
-    @commands.command(aliases=ALIASES.RANK.value)
+    @commands.group(aliases=ALIASES.RANK.value)
     @Checks.is_channel(760861542735806485)
-    async def cmd_rank(self, ctx: commands.Context, member: Optional[Member]) -> None:
+    async def cmd_rank(self, ctx: commands.Context, member: Optional[Member]):
         """Handles rank command
 
         Args:
@@ -199,3 +200,29 @@ class Rank(commands.Cog):
         embed.set_image(url=url)
 
         return embed
+
+    @cmd_rank.group(aliases=ALIASES.RANK_TRACK.value)
+    async def cmd_rank_track(self, ctx : commands.Context):
+        if ctx.invoked_subcommand is self.cmd_rank_track:
+            await ctx.send("Tracking Status noch nichit verfügbar") #TODO: Display tracking status
+    
+    @cmd_rank_track.command(aliases=ALIASES.RANK_TRACK_TOGGLE.value)
+    async def cmd_rank_track_toggle(self, ctx: commands.Context, bool_value: BoolParser(true_strings=['true', 'ja', 'y', '1'], false_strings=['false', 'nein', 'n', '0'])):
+        """Toggles tracking based on argument
+
+        Args:
+            bool_value (BoolParser): String resolves to True,False or None
+        """
+        content: str
+        mention = ctx.author.mention
+
+        if bool_value is None:
+            await ctx.send(STRINGS.RANK_TRACK_TOGGLE_BADARGS.value.format(MENTION=mention))
+            return
+
+        if bool_value:
+            content = STRINGS.RANK_TRACK_TOGGLE_TRUE.value
+        else:
+            content = STRINGS.RANK_TRACK_TOGGLE_FALSE.value
+
+        await ctx.send(content.format(MENTION=mention))
