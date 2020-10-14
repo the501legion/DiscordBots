@@ -29,8 +29,8 @@ def add_cogs():
     bot.add_cog(Roles(bot))
 add_cogs()
 
-DB : DB = bot.get_cog(Cogs.DB)
-ROLES : Roles = bot.get_cog(Cogs.ROLES)
+DB : DB = bot.get_cog(Cogs.DB.value)
+ROLES : Roles = bot.get_cog(Cogs.ROLES.value)
 
 # Discord API key
 API_KEY = secret.API_KEY

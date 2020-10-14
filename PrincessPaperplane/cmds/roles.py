@@ -9,7 +9,7 @@ from typing import List
 class Roles(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
-        self.DB = bot.get_cog(Cogs.DB)
+        self.DB = bot.get_cog(Cogs.DB.value)
 
         # handle added reactions
     @commands.Cog.listener()
