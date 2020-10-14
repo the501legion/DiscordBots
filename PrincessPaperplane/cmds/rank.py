@@ -10,12 +10,13 @@ from discord import Member, TextChannel, Guild, Message, Role, Embed
 from discord.ext import commands
 from utility.checks import Checks
 from utility.cogs_enum import Cogs
+from utility.db import DB
 
 
 class Rank(commands.Cog):
     def __init__(self, bot : commands.Bot):
         self.bot = bot
-        self.DB = bot.get_cog(Cogs.DB)
+        self.DB : DB = bot.get_cog(Cogs.DB)
         self.base_xp = xp_config.BASE
         self.random_xp_range = xp_config.RANDOM_RANGE
 
