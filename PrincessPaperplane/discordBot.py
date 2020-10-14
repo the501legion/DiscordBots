@@ -87,7 +87,7 @@ async def initial_role_check():
         db = dbConnect()
         cur = db.cursor()
         db.autocommit(True)
-        cur.execute("SELECT * FROM user_info")
+        cur.execute("SELECT id, level FROM user_info")
 
         channel = bot.get_channel(id=ROLE_CHANNEL)
         async for message in channel.history(limit=200):
@@ -95,7 +95,7 @@ async def initial_role_check():
                 msg = message
 
         server = bot.get_guild(id=LIVE_SERVER)
-        ids = cur.fetchall()
+        dats = cur.fetchall()
         reacts = msg.reactions
 
         # first check - undetected reactions
@@ -115,8 +115,11 @@ async def initial_role_check():
                     (react_user.id, react_user.name, 0, time.time(), react_user.avatar_url,))
 
         # second check - all users in database
-        for user_id in ids:
-            user = server.get_member(user_id=user_id[1])
+        for dat in dats:
+            user_id = dat[0]
+            level = dat[1]
+
+            user = server.get_member(user_id=user_id)
 
             # iterate over all the reactions/ emojis
             for react in reacts:
@@ -126,6 +129,10 @@ async def initial_role_check():
                 react_users = await react.users().flatten()
                 if user in react_users:
                     # has reacted/ check role
+                    if role_id in ROLES_LEVEL:
+                        if level < ROLES_LEVEL.get(role_id):
+                            continue
+
                     await user.add_roles(role_id)
                     continue
 
