@@ -53,7 +53,7 @@ class Quotes(commands.Cog):
         finally:
             db.close()
 
-    @commands.command(aliases=['qoute', 'q'])
+    @commands.command(aliases=['quote', 'q'])
     @commands.check(read_access_granted)
     async def get_quote(self, ctx: commands.Context):
         db = self.DB.connect()
