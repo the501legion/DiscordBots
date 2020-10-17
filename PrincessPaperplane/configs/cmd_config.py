@@ -18,3 +18,6 @@ class STRINGS(Enum):
 	RANK_TRACK_TOGGLE_BADARGS = "{MENTION}, du musst einen erkennbaren |wahr| oder |falsch| wert angeben!"
 	RANK_TRACK_TOGGLE_TRUE = "{MENTION}, deine XP werden nun getrackt!"
 	RANK_TRACK_TOGGLE_FALSE = "{MENTION}, deine XP werden nicht mehr getrackt!"
+	
+	QUOTE_MESSAGE = "'{TEXT}' -{AUTHOR}"
+

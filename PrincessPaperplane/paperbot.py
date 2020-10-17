@@ -14,12 +14,15 @@ from discord.ext import commands
 
 import utility.db
 from cmds.dice import Dice
+from cmds.quotes import Quotes
 from cmds.rank import Rank
 from cmds.roles import Roles
 from utility.cogs_enum import Cogs
+from utility.db import DB
 
 # create bot
 bot = commands.Bot(command_prefix=cmd_config.PREFIXES)
+
 
 # Add cogs
 def add_cogs():
@@ -27,6 +30,9 @@ def add_cogs():
     bot.add_cog(Rank(bot))
     bot.add_cog(Dice(bot))
     bot.add_cog(Roles(bot))
+    bot.add_cog(Quotes(bot))
+
+
 add_cogs()
 
 DB : DB = bot.get_cog(Cogs.DB.value)
