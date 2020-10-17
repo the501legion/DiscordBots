@@ -29,8 +29,15 @@ class Quotes(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.DB = bot.get_cog(Cogs.DB.value)
+        
+    @commands.group(aliases=['quote', 'q'])
+    @commands.check(read_access_granted)
+    async def cmd_qoute(self, ctx: commands.Context):
+        if ctx.invoked_subcommand is None:
+            await get_qoute(ctx)
+        
 
-    @commands.command(aliases=['quote-add', 'qa'])
+    @cmd_qoute.command(aliases=['add', 'a'])
     @commands.check(write_access_granted)
     async def add_quote(self, ctx: commands.Context, member: discord.Member = None, *, quote=None):
         db = self.DB.connect()
@@ -53,8 +60,6 @@ class Quotes(commands.Cog):
         finally:
             db.close()
 
-    @commands.command(aliases=['quote', 'q'])
-    @commands.check(read_access_granted)
     async def get_quote(self, ctx: commands.Context):
         db = self.DB.connect()
 
