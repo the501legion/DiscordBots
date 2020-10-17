@@ -6,6 +6,15 @@ from utility.cogs_enum import Cogs
 from typing import List
 
 
+class EmoteRoleSettings:
+    """Encapsulates data for role reactions based on emotes
+    """
+    def __init__(self, role_id: int, emote: str, text: str):
+        self.role_id = role_id
+        self.emote = emote
+        self.text = text
+
+
 class Roles(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -107,10 +116,3 @@ class Roles(commands.Cog):
                     self.DB.log("Role " + role.name + " assigned to " + user.name)
                     await user.add_roles(role)
 
-class EmoteRoleSettings():
-    """Encapsulates data for role reactions based on emotes
-    """
-    def __init__(self, role_id: int, emote: str, text: str):
-      self.role_id = role_id
-      self.emote = emote
-      self.text = text
