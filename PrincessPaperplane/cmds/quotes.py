@@ -11,7 +11,7 @@ from utility.cogs_enum import Cogs
 
 async def write_access_granted(ctx: commands.context):
     for role in ctx.author.roles:
-        if role in WRITE_ACCESS:
+        if role.id in WRITE_ACCESS:
             return True
 
     return False
@@ -19,7 +19,7 @@ async def write_access_granted(ctx: commands.context):
 
 async def read_access_granted(ctx: commands.context):
     for role in ctx.author.roles:
-        if role in READ_ACCESS:
+        if role.id in READ_ACCESS:
             return True
 
     return False
@@ -29,15 +29,14 @@ class Quotes(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.DB = bot.get_cog(Cogs.DB.value)
-        
+
     @commands.group(aliases=['quote', 'q'])
     @commands.check(read_access_granted)
-    async def cmd_qoute(self, ctx: commands.Context):
+    async def cmd_quote(self, ctx: commands.Context):
         if ctx.invoked_subcommand is None:
-            await get_qoute(ctx)
-        
+            await self.get_quote(ctx)
 
-    @cmd_qoute.command(aliases=['add', 'a'])
+    @cmd_quote.command(aliases=['add', 'a'])
     @commands.check(write_access_granted)
     async def add_quote(self, ctx: commands.Context, member: discord.Member = None, *, quote=None):
         db = self.DB.connect()
