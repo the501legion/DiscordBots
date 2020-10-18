@@ -1,6 +1,10 @@
 from enum import Enum
+from typing import Optional, List
 
 PREFIXES = ['!']
+
+TRUE_STRINGS : Optional[List[str]] = ['true', 'ja', 'y', '1']
+FALSE_STRINGS : Optional[List[str]] = ['false', 'nein', 'n', '0']
 
 class ALIASES(Enum):
 	RANK = ['rank', 'rang', 'level', 'lvl']

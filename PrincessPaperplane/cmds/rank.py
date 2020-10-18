@@ -13,7 +13,6 @@ from utility.cogs_enum import Cogs
 from utility.db import DB
 from utility.converters import BoolParser
 
-
 class Rank(commands.Cog):
     def __init__(self, bot : commands.Bot):
         self.bot = bot
@@ -207,7 +206,7 @@ class Rank(commands.Cog):
             await ctx.send("Tracking Status noch nichit verfügbar") #TODO: Display tracking status
     
     @cmd_rank_track.command(aliases=ALIASES.RANK_TRACK_TOGGLE.value)
-    async def cmd_rank_track_toggle(self, ctx: commands.Context, bool_value: BoolParser(true_strings=['true', 'ja', 'y', '1'], false_strings=['false', 'nein', 'n', '0'])):
+    async def cmd_rank_track_toggle(self, ctx: commands.Context, bool_value: BoolParser()):
         """Toggles tracking based on argument
 
         Args:
