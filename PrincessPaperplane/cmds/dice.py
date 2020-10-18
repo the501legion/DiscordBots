@@ -1,9 +1,8 @@
-
-from random import randint
-
+from random import sample, randint
 import configs.cmd_config as cmd_config
 from discord.ext import commands
 from configs.cmd_config import STRINGS, ALIASES
+import typing
 
 class Dice(commands.Cog):
     def __init__(self, bot: commands.Bot):
@@ -33,16 +32,25 @@ class Dice(commands.Cog):
         await ctx.channel.send(content=content)
 
     @commands.command(aliases=ALIASES.RANDOM.value)
-    async def cmd_random(self, ctx: commands.Context, *args: str):
+    async def cmd_random(self, ctx: commands.Context, choice_amount: typing.Optional[int] = 1, *args: str):
         """Wählt zufälliges Element aus
 
         Args:
             ctx (commands.Context): [description]
         """
 
-        if args is None or args.count <= 0:
-            await ctx.send(f"{ctx.author.mention}, gib bitte ein paar Optionen an!")
+        mention : str = ctx.author.mention
 
-        choice = args[randint(0, args.count - 1)]
-        await ctx.send(f"{ctx.author.mention}, deine Zufallswahl: {choice}")
+        #No values below zero
+        if choice_amount <= 0: 
+            await ctx.send(STRINGS.RANDOM_INVALID_NUMER.value.format(MENTION=mention))
+            return
+        # Choices have to be given
+        if args is None or args.count <= 0:
+            await ctx.send(STRINGS.RANDOM_NO_CHOICES.value.format(MENTION=mention))
+            return
+
+        choice_amount = min(choice_amount, len(args)) #Don't go over the amount of possible
+        choices = sample(population=args, k=choice_amount)
+        await ctx.send(f"{mention}, deine Zufallswahl: {' , '.join(choices)}")
                 
