@@ -23,11 +23,11 @@ class Dice(commands.Cog):
             return
 
         # Get dice rolls
-        possible_numbers = range(1,dice)
+        possible_numbers = range(1,dice+1)
         dice_rolls = choices(possible_numbers, k=amount)
 
         # print rolled dices
-        results = ", ".join(dice_rolls)
+        results = ", ".join(map(str, dice_rolls))
         content = STRINGS.DICE_RESULT.value.format(MENTION=author.mention, RESULT=results)
 
         await ctx.channel.send(content=content)
@@ -53,5 +53,5 @@ class Dice(commands.Cog):
 
         choice_amount = min(choice_amount, len(args)) #Don't go over the amount of possible
         choices = sample(population=args, k=choice_amount)
-        await ctx.send(f"{mention}, deine Zufallswahl: {', '.join(choices)}")
+        await ctx.send(f"{mention}, deine Zufallswahl: {', '.join(map(str, choices))}")
                 
