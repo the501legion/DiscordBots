@@ -18,12 +18,9 @@ class History(commands.Cog):
 
     @cmd_history.group(aliases=['xp_count'])
     async def cmd_history_collect(self, ctx: commands.Context, channels : Greedy[TextChannelConverter]):
-        if ctx.subcommand_passed is not None:
-            return
-
-        self.count_user_messages_in_channels(ctx, ctx.channel)
-
-    #Collect for this channel only
+        if ctx.subcommand_passed is None:
+            await self.count_user_messages_in_channels(ctx, ctx.channel)        
+        #Collect for this channel only
 
     async def count_user_messages_in_channels(self, ctx, *channels: TextChannel):
         """Specify channels to parse for user message count
