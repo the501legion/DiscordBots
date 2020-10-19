@@ -23,7 +23,7 @@ class STRINGS(Enum):
 	Args:
 		Enum ([type]): [description]
 	"""
-	DICE_RESULT = "{MENTION} Du hast folgende Zahlen gewürfelt: "  #Leave whitespace at end!
+	DICE_RESULT = "{MENTION} Du hast folgende Zahlen gewürfelt: {RESULT}"  #Leave whitespace at end!
 	RANDOM_INVALID_NUMER = "{MENTION}, gibt bitte eine korrekte Zahl an!"
 	RANDOM_NO_CHOICES = "{MENTION}, gib bitte ein paar Optionen an!"
 

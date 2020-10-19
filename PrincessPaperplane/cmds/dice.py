@@ -1,4 +1,4 @@
-from random import sample, randint
+from random import sample, choices
 import configs.cmd_config as cmd_config
 from discord.ext import commands
 from configs.cmd_config import STRINGS, ALIASES
@@ -22,13 +22,14 @@ class Dice(commands.Cog):
         if dice < 1 or amount < 1:
             return
 
-        # print rolled dices
-        content = STRINGS.DICE_RESULT.value.format(MENTION=author.mention)
+        # Get dice rolls
+        possible_numbers = range(1,dice)
+        dice_rolls = choices(possible_numbers, k=amount)
 
-        for i in range(0, amount):
-            if i != 0:
-                content = content + ", "
-            content = content + str(randint(1, dice))
+        # print rolled dices
+        results = ", ".join(dice_rolls)
+        content = STRINGS.DICE_RESULT.value.format(MENTION=author.mention, RESULT=results)
+
         await ctx.channel.send(content=content)
 
     @commands.command(aliases=ALIASES.RANDOM.value)
@@ -52,5 +53,5 @@ class Dice(commands.Cog):
 
         choice_amount = min(choice_amount, len(args)) #Don't go over the amount of possible
         choices = sample(population=args, k=choice_amount)
-        await ctx.send(f"{mention}, deine Zufallswahl: {' , '.join(choices)}")
+        await ctx.send(f"{mention}, deine Zufallswahl: {', '.join(choices)}")
                 
