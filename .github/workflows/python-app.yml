@@ -17,7 +17,7 @@ jobs:
     steps:
     - name: Update PIP
       run: |
-        python3 -m pip3 install --upgrade pip3
+        python3 -m pip install --upgrade pip
     - name: Run code
       run: |
         python3 PrincessPaperplane/paperbot.py -test
