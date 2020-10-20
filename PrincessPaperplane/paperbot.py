@@ -23,9 +23,6 @@ from cmds.roles import Roles
 from utility.cogs_enum import Cogs
 from utility.db import DB
 
-# load environment variables
-load_dotenv(find_dotenv())
-
 # create bot
 bot = commands.Bot(command_prefix=cmd_config.PREFIXES)
 
@@ -43,9 +40,6 @@ add_cogs()
 
 DB: DB = bot.get_cog(Cogs.DB.value)
 ROLES: Roles = bot.get_cog(Cogs.ROLES.value)
-
-# Discord API key
-API_KEY = os.getenv("DISCORD.API_KEY")
 
 prefixes_regex = '(' + "|".join(bot.command_prefix) + ')'
 DICE_CMD_REGEX = re.compile(r"^({prefix})([w,d])".format(prefix=prefixes_regex))
@@ -97,6 +91,9 @@ def main():
             guild_config.SERVER = guild_config.SERVER_TEST
             guild_config.ROLE_CHANNEL = guild_config.ROLE_CHANNEL_TEST
             roles_config.EMOTE_ROLES = roles_config.EMOTE_ROLES_TEST
+
+    load_dotenv(find_dotenv())
+    API_KEY = os.getenv("DISCORD.API_KEY")
 
     # RUN BOT
     bot.run(API_KEY)
