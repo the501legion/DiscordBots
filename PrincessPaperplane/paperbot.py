@@ -10,7 +10,7 @@ from pathlib import Path
 
 import discord
 from discord.ext import commands
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
 import configs.cmd_config as cmd_config
 import configs.guild_config as guild_config
@@ -24,7 +24,7 @@ from utility.cogs_enum import Cogs
 from utility.db import DB
 
 # load environment variables
-load_dotenv(dotenv_path=Path('.') / '.env')
+load_dotenv(find_dotenv())
 
 # create bot
 bot = commands.Bot(command_prefix=cmd_config.PREFIXES)
@@ -88,6 +88,7 @@ async def handle_command(message):
         cmd_length = len(match.group(1)) + len(match.group(2))
         message.content = message.content[:cmd_length] + " " + message.content[cmd_length:]
     await bot.process_commands(message)
+
 
 def main():
     # print command line arguments
