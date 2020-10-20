@@ -15,6 +15,9 @@ jobs:
     runs-on: [self-hosted]
 
     steps:
+    - name: Update PIP
+      run: |
+        python3 -m pip3 install --upgrade pip3
     - name: Run code
       run: |
         python3 PrincessPaperplane/paperbot.py -test
