@@ -22,6 +22,9 @@ jobs:
     - name: Update PIP
       run: |
         python3 -m pip install --upgrade pip
+    - name: Copy credentials
+      run: |
+        cp ../../../.env PrincessPaperplane/.
     - name: Run code
       run: |
         python3 PrincessPaperplane/paperbot.py -test
