@@ -3,6 +3,7 @@
 
 import re  # Regex
 import sys
+import os
 
 # import modules
 from pathlib import Path
@@ -44,7 +45,7 @@ DB: DB = bot.get_cog(Cogs.DB.value)
 ROLES: Roles = bot.get_cog(Cogs.ROLES.value)
 
 # Discord API key
-API_KEY = secret.API_KEY
+API_KEY = os.getenv("DISCORD.API_KEY")
 
 prefixes_regex = '(' + "|".join(bot.command_prefix) + ')'
 DICE_CMD_REGEX = re.compile(r"^({prefix})([w,d])".format(prefix=prefixes_regex))

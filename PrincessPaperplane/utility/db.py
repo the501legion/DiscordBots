@@ -1,4 +1,5 @@
 import time
+import os
 
 import configs.db_config as db_config
 import configs.secret as secret
@@ -17,11 +18,11 @@ class DB(commands.Cog):
             [type]: Connection to database
         """
         return MySQLdb.connect(host=secret.DB_HOST,
-        user=secret.DB_USER,
+        user=os.getenv("DATABASE.USER"),
         charset=db_config.DB_CHARSET,
         use_unicode=db_config.DB_UNICODE,
-        passwd=secret.DB_PASSWD,
-        db=secret.DB_DB)
+        passwd=os.getenv("DATABASE.PASSWD"),
+        db=os.getenv("DATABASE.DB"))
     
     def log(self, text: str):
         """Log text in console and in database
