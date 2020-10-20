@@ -2,6 +2,8 @@
 # coding=utf-8
 
 import re  # Regex
+import sys
+
 # import modules
 from pathlib import Path
 
@@ -63,8 +65,6 @@ async def on_ready():
     print('Connected to')
     for guild in bot.guilds:
         print("- " + guild.name)
-        if guild.id == guild_config.TEST_SERVER:
-            bot.user.name = bot.user.name + " (Test)"
 
     await bot.change_presence(status=discord.Status.online,
                               activity=discord.Activity(name='twitch.tv/princesspaperplane',
@@ -72,7 +72,6 @@ async def on_ready():
     print('------')
 
     await ROLES.update_reaction_msg(guild_config.ROLE_CHANNEL, roles_config.EMOTE_ROLES)
-    await ROLES.update_reaction_msg(guild_config.ROLE_CHANNEL_TEST, roles_config.TEST_EMOTE_ROLES)
 
 
 @bot.event
@@ -89,6 +88,16 @@ async def handle_command(message):
         message.content = message.content[:cmd_length] + " " + message.content[cmd_length:]
     await bot.process_commands(message)
 
+def main():
+    # print command line arguments
+    for arg in sys.argv[1:]:
+        if arg == "-test":
+            guild_config.SERVER = guild_config.SERVER_TEST
+            guild_config.ROLE_CHANNEL = guild_config.ROLE_CHANNEL_TEST
+            roles_config.EMOTE_ROLES = roles_config.EMOTE_ROLES_TEST
 
-# RUN BOT
-bot.run(API_KEY)
+    # RUN BOT
+    bot.run(API_KEY)
+
+if __name__ == "__main__":
+    main()

@@ -34,7 +34,7 @@ class Roles(commands.Cog):
     async def update_reaction_msg(self, roleChannel, emote_roles : List[EmoteRoleSettings]):
         channel : TextChannel = self.bot.get_channel(id=roleChannel)
         guild : Guild = channel.guild
-        msg: Message
+        msg : Message
         
         async for message in channel.history(limit=200):
             if message.author == self.bot.user:
@@ -62,7 +62,7 @@ class Roles(commands.Cog):
 
     # handle role reactions
     async def handle_role_reactions(self, payload):
-        if payload.channel_id == guild_config.ROLE_CHANNEL or payload.channel_id == guild_config.ROLE_CHANNEL_TEST:
+        if payload.channel_id == guild_config.ROLE_CHANNEL:
             emoji : Emoji = payload.emoji
             guild : Guild = self.bot.get_guild(id=payload.guild_id)
             user : Member = guild.get_member(user_id=payload.user_id)
@@ -77,14 +77,13 @@ class Roles(commands.Cog):
             cur = db.cursor()
             db.autocommit(True)
 
-            if payload.channel_id == guild_config.ROLE_CHANNEL:
-                emote_roles = roles_config.EMOTE_ROLES
+            emote_roles = roles_config.EMOTE_ROLES
+            level_channel = self.bot.get_channel(id=guild_config.LEVEL_CHANNEL)
+
+            if payload.guild_id == guild_config.SERVER_LIVE:
                 cur.execute("SELECT level FROM user_info WHERE id = %s", (user.id,))
-                level_channel = self.bot.get_channel(id=guild_config.LEVEL_CHANNEL)
-            elif payload.channel_id == guild_config.ROLE_CHANNEL_TEST:
-                emote_roles = roles_config.TEST_EMOTE_ROLES
+            elif payload.guild_id == guild_config.SERVER_TEST:
                 cur.execute("SELECT level FROM user_info_test WHERE id = %s", (user.id,))
-                level_channel = self.bot.get_channel(id=guild_config.LEVEL_CHANNEL_TEST)
             if cur.rowcount > 0:
                 level = cur.fetchone()[0]
             db.close()

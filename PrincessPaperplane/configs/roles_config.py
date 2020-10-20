@@ -21,12 +21,6 @@ ROLES_TEST = [ 763105108841332766, 763105158078922763, 763105190765002783 ]
 EMOTES_TEST = [ "🪃", "🎨", "🎬" ]
 TEXT_TEST = ["Rolle A für :boomerang:", "Rolle B für :art:", "Rolle C für :clapper:"] """
 
-TEST_EMOTE_ROLES : List[EmoteRoleSettings]  = [
-  EmoteRoleSettings(763105108841332766,"🪃","Rolle A für :boomerang:"),
-  EmoteRoleSettings(763105158078922763,"🎨","Rolle B für :art:"),
-  EmoteRoleSettings(763105190765002783,"🎬", "Rolle C für :clapper:")
-]
-
 # roles which will be given by emote
 EMOTE_ROLES : List[EmoteRoleSettings]  = [
   EmoteRoleSettings(763374681025150986,"🪃",":boomerang: um Sportler:in zu werden."),
@@ -39,3 +33,8 @@ EMOTE_ROLES : List[EmoteRoleSettings]  = [
   EmoteRoleSettings(763375221201567774,"🎭",":performing_arts: wenn Du Dich für Pen & Paper interessierst.")
 ]
 
+EMOTE_ROLES_TEST : List[EmoteRoleSettings]  = [
+  EmoteRoleSettings(763105108841332766,"🪃","Rolle A für :boomerang:"),
+  EmoteRoleSettings(763105158078922763,"🎨","Rolle B für :art:"),
+  EmoteRoleSettings(763105190765002783,"🎬", "Rolle C für :clapper:")
+]
