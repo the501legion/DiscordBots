@@ -27,4 +27,5 @@ jobs:
         cp ../../../.env PrincessPaperplane/.
     - name: Run code
       run: |
-        tmux new-session -d -s paperbot \; send-keys "python3 PrincessPaperplane/paperbot.py -test" Enter
+        tmux new-session -d -s paperbot
+        python3 PrincessPaperplane/paperbot.py -test
