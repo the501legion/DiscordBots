@@ -9,14 +9,13 @@ import configs.guild_config as guild_config
 import configs.roles_config as roles_config
 import configs.cmd_config as cmd_config
 import discord
-import MySQLdb
 from discord.ext import commands
 
-import utility.db
+from cmds.Quotes.Discord import Quotes
 from cmds.dice import Dice
-from cmds.quotes import Quotes
 from cmds.rank import Rank
 from cmds.roles import Roles
+from configs.twitch_config import Mappings, twitch_chat
 from utility.cogs_enum import Cogs
 from utility.db import DB
 
@@ -63,6 +62,17 @@ async def on_ready():
             bot.user.name = bot.user.name + " (Test)"
 
     await bot.change_presence(status=discord.Status.online, activity=discord.Activity(name='twitch.tv/princesspaperplane', type=discord.ActivityType.watching))
+
+    print('------')
+    print('Init twitch command mapping')
+
+    for module in Mappings.keys():
+        print(f'Start Mapping for: {module}')
+
+        for mapng in Mappings[module]:
+            twitch_chat.subscribe(mapng)
+            print(f'{mapng.__name__} was successful mapped')
+
     print('------')
 
     await ROLES.update_reaction_msg(guild_config.ROLE_CHANNEL, roles_config.EMOTE_ROLES)
