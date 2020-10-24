@@ -71,6 +71,8 @@ async def on_ready():
     print('------')
 
     await CRAWLER.run()
+    print('------')
+
     await ROLES.update_reaction_msg(guild_config.ROLE_CHANNEL, roles_config.EMOTE_ROLES)
     # await ROLES.update_reaction_msg(os.getenv("DISCORD.CHANNEL.ROLE.LIVE"), roles_config.EMOTE_ROLES)
 
