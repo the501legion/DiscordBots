@@ -7,3 +7,4 @@ class Cogs(Enum):
     DICE = 'Dice'
     ROLES = 'Roles'
     QUOTES = 'Quotes'
+    CRAWLER = 'ArtCrawler'

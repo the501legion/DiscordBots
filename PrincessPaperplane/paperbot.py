@@ -6,7 +6,6 @@ import sys
 import os
 
 # import modules
-from pathlib import Path
 
 import discord
 from discord.ext import commands
@@ -15,7 +14,7 @@ from dotenv import load_dotenv, find_dotenv
 import configs.cmd_config as cmd_config
 import configs.guild_config as guild_config
 import configs.roles_config as roles_config
-import configs.secret as secret
+from cmds.TwitterCrawler.ArtCrawler import ArtCrawler
 from cmds.dice import Dice
 from cmds.quotes import Quotes
 from cmds.rank import Rank
@@ -34,12 +33,16 @@ def add_cogs():
     bot.add_cog(Dice(bot))
     bot.add_cog(Roles(bot))
     bot.add_cog(Quotes(bot))
+    bot.add_cog(ArtCrawler(bot))
 
 
 add_cogs()
 
 DB: DB = bot.get_cog(Cogs.DB.value)
 ROLES: Roles = bot.get_cog(Cogs.ROLES.value)
+
+# Twitter Crawler
+CRAWLER: ArtCrawler = bot.get_cog(Cogs.CRAWLER.value)
 
 prefixes_regex = '(' + "|".join(bot.command_prefix) + ')'
 DICE_CMD_REGEX = re.compile(r"^({prefix})([w,d])".format(prefix=prefixes_regex))
@@ -64,9 +67,12 @@ async def on_ready():
     await bot.change_presence(status=discord.Status.online,
                               activity=discord.Activity(name='twitch.tv/princesspaperplane',
                                                         type=discord.ActivityType.watching))
+
     print('------')
 
+    await CRAWLER.run()
     await ROLES.update_reaction_msg(guild_config.ROLE_CHANNEL, roles_config.EMOTE_ROLES)
+    # await ROLES.update_reaction_msg(os.getenv("DISCORD.CHANNEL.ROLE.LIVE"), roles_config.EMOTE_ROLES)
 
 
 @bot.event
@@ -97,6 +103,7 @@ def main():
 
     # RUN BOT
     bot.run(API_KEY)
+
 
 if __name__ == "__main__":
     main()
