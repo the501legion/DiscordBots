@@ -29,4 +29,5 @@ jobs:
       run: |
         tmux kill-session -t paperbot
         tmux new-session -d -s paperbot
+        chmod +x run.sh
         ./run.sh
