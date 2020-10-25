@@ -7,6 +7,8 @@ import os
 
 # import modules
 
+import traceback
+
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv, find_dotenv
@@ -51,7 +53,8 @@ DICE_CMD_REGEX = re.compile(r"^({prefix})([w,d])".format(prefix=prefixes_regex))
 # start bot
 @bot.event
 async def on_ready():
-    bot.user.name = "PaperBot"
+    try:
+        bot.user.name = "PaperBot"
 
     DB.log('Bot started')
     print('------')
@@ -75,7 +78,9 @@ async def on_ready():
 
     await ROLES.update_reaction_msg(guild_config.ROLE_CHANNEL, roles_config.EMOTE_ROLES)
     # await ROLES.update_reaction_msg(os.getenv("DISCORD.CHANNEL.ROLE.LIVE"), roles_config.EMOTE_ROLES)
-
+    except:
+        DB.log("Error: " + traceback.format_exc())
+        
 
 @bot.event
 async def on_message(message):

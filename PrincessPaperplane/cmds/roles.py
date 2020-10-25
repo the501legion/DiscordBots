@@ -34,7 +34,7 @@ class Roles(commands.Cog):
     async def update_reaction_msg(self, roleChannel, emote_roles : List[EmoteRoleSettings]):
         channel : TextChannel = self.bot.get_channel(id=roleChannel)
         guild : Guild = channel.guild
-        msg : Message
+        msg : Message = None
         
         async for message in channel.history(limit=200):
             if message.author == self.bot.user:
@@ -73,7 +73,7 @@ class Roles(commands.Cog):
             if user == self.bot.user:
                 return
 
-            db = self.DB.dbConnect()
+            db = self.DB.connect()
             cur = db.cursor()
             db.autocommit(True)
 

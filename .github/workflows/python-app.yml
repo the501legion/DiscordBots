@@ -27,6 +27,7 @@ jobs:
         cp ../../../.env PrincessPaperplane/.
     - name: Run code
       run: |
-        tmux kill-session -t paperbot
-        tmux new-session -d -s paperbot
-        python3 PrincessPaperplane/paperbot.py -test
+        chmod +x run.sh
+        echo "Prepare run"
+        ./run.sh
+        echo "Finish run"
