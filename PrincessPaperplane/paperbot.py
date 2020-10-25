@@ -72,7 +72,6 @@ async def on_ready():
         await ROLES.update_reaction_msg(guild_config.ROLE_CHANNEL, roles_config.EMOTE_ROLES)
     except:
         DB.log("Error: " + traceback.format_exc())
-        raise
 
 
 @bot.event
