@@ -8,6 +8,8 @@ import os
 # import modules
 from pathlib import Path
 
+import traceback
+
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv, find_dotenv
@@ -69,7 +71,7 @@ async def on_ready():
 
         await ROLES.update_reaction_msg(guild_config.ROLE_CHANNEL, roles_config.EMOTE_ROLES)
     except:
-        DB.log("Error: ", sys.exc_info()[0])
+        DB.log("Error: " + traceback.format_exc())
         raise
 
 
