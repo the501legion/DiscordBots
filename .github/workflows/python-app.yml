@@ -25,8 +25,8 @@ jobs:
     - name: Copy credentials
       run: |
         cp ../../../.env PrincessPaperplane/.
-    - name: Run code
-      run: |
-        tmux kill-session -t paperbot
-        tmux new-session -d -s paperbot
-        run.sh
+#    - name: Run code
+#      run: |
+#        tmux kill-session -t paperbot
+#        tmux new-session -d -s paperbot
+#        run.sh
