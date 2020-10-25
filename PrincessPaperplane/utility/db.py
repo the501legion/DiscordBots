@@ -2,6 +2,7 @@ import time
 import os
 
 import configs.db_config as db_config
+import configs.guild_config as guild_config
 import configs.secret as secret
 import MySQLdb
 from discord.ext import commands
@@ -36,7 +37,10 @@ class DB(commands.Cog):
             db = self.connect()
             cur = db.cursor()
             db.autocommit(True)
-            cur.execute("INSERT INTO log_info (`text`, `time`) VALUES (%s, %s)", (text, time.time(), ))
+            if guild_config.SERVER == guild_config.SERVER_TEST:
+                cur.execute("INSERT INTO log_info_test (`text`, `time`) VALUES (%s, %s)", (text, time.time(), ))
+            else:
+                cur.execute("INSERT INTO log_info (`text`, `time`) VALUES (%s, %s)", (text, time.time(), ))
         except Exception as e:
             self.log("Exception in log: " + str(e))
             pass
