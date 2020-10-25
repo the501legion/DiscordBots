@@ -29,4 +29,4 @@ jobs:
       run: |
         tmux kill-session -t paperbot
         tmux new-session -d -s paperbot
-        python3 PrincessPaperplane/paperbot.py -test
+        run.sh
