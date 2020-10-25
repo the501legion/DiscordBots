@@ -56,31 +56,31 @@ async def on_ready():
     try:
         bot.user.name = "PaperBot"
 
-    DB.log('Bot started')
-    print('------')
-    print('DB.logged in as')
-    print(bot.user.name)
-    print(bot.user.id)
-    print('------')
+        DB.log('Bot started')
+        print('------')
+        print('DB.logged in as')
+        print(bot.user.name)
+        print(bot.user.id)
+        print('------')
 
-    print('Connected to')
-    for guild in bot.guilds:
-        print("- " + guild.name)
+        print('Connected to')
+        for guild in bot.guilds:
+            print("- " + guild.name)
 
-    await bot.change_presence(status=discord.Status.online,
-                              activity=discord.Activity(name='twitch.tv/princesspaperplane',
-                                                        type=discord.ActivityType.watching))
+        await bot.change_presence(status=discord.Status.online,
+                                  activity=discord.Activity(name='twitch.tv/princesspaperplane',
+                                                            type=discord.ActivityType.watching))
 
-    print('------')
+        print('------')
 
-    await CRAWLER.run()
-    print('------')
+        await CRAWLER.run()
+        print('------')
 
-    await ROLES.update_reaction_msg(guild_config.ROLE_CHANNEL, roles_config.EMOTE_ROLES)
-    # await ROLES.update_reaction_msg(os.getenv("DISCORD.CHANNEL.ROLE.LIVE"), roles_config.EMOTE_ROLES)
-    except:
+        await ROLES.update_reaction_msg(guild_config.ROLE_CHANNEL, roles_config.EMOTE_ROLES)
+        # await ROLES.update_reaction_msg(os.getenv("DISCORD.CHANNEL.ROLE.LIVE"), roles_config.EMOTE_ROLES)
+    except Exception:
         DB.log("Error: " + traceback.format_exc())
-        
+
 
 @bot.event
 async def on_message(message):
