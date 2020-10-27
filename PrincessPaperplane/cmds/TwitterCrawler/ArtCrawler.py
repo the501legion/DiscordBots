@@ -1,5 +1,6 @@
 import os
 import threading
+from pathlib import Path
 from queue import Queue
 
 from discord import TextChannel, Embed
@@ -34,7 +35,7 @@ class ArtCrawler(Cog):
 
         media_url = tweet['includes']['media'][0]['url']
         embed.set_thumbnail(url=media_url)
-        embed.set_image(url=media_url)
+        embed.set_image(url=Path('../../res/img') / 'Twitter_Social_Icon_Circle_Color.png')
 
         embed.set_author(name=author['name'],
                          icon_url=author['profile_image_url'],
