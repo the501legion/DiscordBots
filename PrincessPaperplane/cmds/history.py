@@ -2,12 +2,17 @@ from discord.ext import commands
 from discord.ext.commands import Greedy, TextChannelConverter
 from discord import Embed, TextChannel, Forbidden
 from configs.cmd_config import ALIASES
+from utility.db import DB
+from utility.cogs_enum import Cogs
 from pathlib import Path
 import pandas as pd
+import MySQLdb
+from typing import List
 
 class History(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        self.Database : DB =  bot.get_cog(Cogs.DB.value)
 
     @commands.group(aliases=ALIASES.HISTORY.value)
     @commands.guild_only()
@@ -33,6 +38,9 @@ class History(commands.Cog):
         embed = self.create_collection_embed(ctx, channel_status)
         status_message = await ctx.channel.send(embed=embed)
 
+        db = self.Database.connect()
+        db.autocommit(True)
+
         #channels is variable list -> can be iterated
         for channel in iter(channels):
             print(f"COLLECT USER MESSAGE COUNT IN {channel.category.name}-{channel.name} | COLLECTING")
@@ -41,12 +49,16 @@ class History(commands.Cog):
             embed = self.create_collection_embed(ctx, channel_status)
             await status_message.edit(embed=embed)
 
+            channel_user_message_counts : pd.DataFrame
+
             try:
-                await self.save_channel_user_message_counts(ctx, channel)
+                channel_user_message_counts = await self.collect_channel_user_message_counts(ctx, channel)
             except (Exception, Forbidden):
                 channel_status[channel] = "failed"
             else:
                 channel_status[channel] = "finished"
+                self.clear_message_counts_in_db([channel], db) #Clear, then reapply
+                self.save_channel_message_counts_in_db(ctx, channel, channel_user_message_counts, db)
 
             print(f"COLLECT USER MESSAGE COUNT IN {channel.category.name}-{channel.name} | {channel_status[channel].upper()}")
             print("==============")
@@ -54,6 +66,29 @@ class History(commands.Cog):
         # Final embed
         embed = self.create_collection_embed(ctx, channel_status, True)
         await status_message.edit(embed=embed)
+        
+    def clear_message_counts_in_db(self, channels: List[TextChannel], conn: MySQLdb.Connection):
+        cur : MySQLdb.cursors.Cursor = conn.cursor()
+        for channel in channels:
+            cur.execute("DELETE FROM message_counts WHERE channel_id = %d", (channel.id)) #Delete all entries of this channel
+
+    def save_channel_message_counts_in_db(self, ctx: commands.Context, channel: TextChannel, collected_data: pd.DataFrame, conn: MySQLdb.Connection):
+        """Save collected message count data for specific channel to database
+
+        Args:
+            ctx (commands.Context): Context of command
+            channel (TextChannel): Channel that was parsed
+            collected_data (pd.DataFrame): Collected data
+            conn (MySQLdb.Connection): Database connection
+        """
+        cur = conn.cursor()
+
+        channel_id = channel.id
+
+        for key, row in collected_data.iteritems():
+            user_id = key
+            count = row['count']
+            cur.execute("INSERT INTO message_counts (channel_id, user_id, count) VALUES (%d, %d, %d)", (channel_id, user_id, count))
 
     @cmd_history_collect.command(pass_context=True, aliases=['all', 'a'])
     async def cmd_history_collect_all(self, ctx: commands.Context, *args):
@@ -66,9 +101,8 @@ class History(commands.Cog):
         channels_to_parse = filter(lambda c: not c in exclude_channels, ctx.guild.text_channels)
         await self.count_user_messages_in_channels(ctx, *list(channels_to_parse))
 
-
     ### Internal logic
-    async def save_channel_user_message_counts(self, ctx, channel : TextChannel):
+    async def collect_channel_user_message_counts(self, ctx, channel : TextChannel) -> pd.DataFrame:
         """Counts messages per user for channel
         Returns:
             pandas.DataFrame: Dataframe with ['channel_id,' 'count'] and user_id as index label
@@ -88,13 +122,6 @@ class History(commands.Cog):
             else: #Insert new entry
                 df.loc[member_id] = [channel.id, 1]
                 last_time_dict[member_id] = message.created_at
-
-        save_to_folder_path = Path('data') / f'{ctx.guild.id}-{ctx.guild.name}_user_message_counts'
-
-        #Save to file
-        if not save_to_folder_path.exists():
-            save_to_folder_path.mkdir()
-        df.to_csv(save_to_folder_path / f'{channel.id}_{channel.category.name.upper()}-{channel.name}.csv', index=True)
 
         return df
 
