@@ -16,11 +16,11 @@ from dotenv import load_dotenv, find_dotenv
 import configs.cmd_config as cmd_config
 import configs.guild_config as guild_config
 import configs.roles_config as roles_config
-from cmds.TwitterCrawler.ArtCrawler import ArtCrawler
 from cmds.dice import Dice
 from cmds.quotes import Quotes
 from cmds.rank import Rank
 from cmds.roles import Roles
+from ext import load_extensions
 from utility.cogs_enum import Cogs
 from utility.db import DB
 
@@ -35,16 +35,12 @@ def add_cogs():
     bot.add_cog(Dice(bot))
     bot.add_cog(Roles(bot))
     bot.add_cog(Quotes(bot))
-    bot.add_cog(ArtCrawler(bot))
 
 
 add_cogs()
 
 DB: DB = bot.get_cog(Cogs.DB.value)
 ROLES: Roles = bot.get_cog(Cogs.ROLES.value)
-
-# Twitter Crawler
-CRAWLER: ArtCrawler = bot.get_cog(Cogs.CRAWLER.value)
 
 prefixes_regex = '(' + "|".join(bot.command_prefix) + ')'
 DICE_CMD_REGEX = re.compile(r"^({prefix})([w,d])".format(prefix=prefixes_regex))
@@ -72,10 +68,10 @@ async def on_ready():
                                                             type=discord.ActivityType.watching))
 
         print('------')
+        print('Loading Extensions')
+        load_extensions(bot)
 
-        await CRAWLER.run()
         print('------')
-
         await ROLES.update_reaction_msg(guild_config.ROLE_CHANNEL, roles_config.EMOTE_ROLES)
         # await ROLES.update_reaction_msg(os.getenv("DISCORD.CHANNEL.ROLE.LIVE"), roles_config.EMOTE_ROLES)
     except Exception:
