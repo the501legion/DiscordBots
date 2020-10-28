@@ -5,6 +5,7 @@ PREFIXES = ['!']
 class ALIASES(Enum):
 	RANK = ['rank', 'rang', 'level', 'lvl']
 	DICE = ['dice', 'w', 'd']
+	HISTORY = ['h', 'history']
 
 class STRINGS(Enum):
 	DICE_RESULT = "{MENTION} Du hast folgende Zahlen gewürfelt: " #Leave whitespace at end!

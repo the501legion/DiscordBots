@@ -21,6 +21,7 @@ from cmds.dice import Dice
 from cmds.quotes import Quotes
 from cmds.rank import Rank
 from cmds.roles import Roles
+from cmds.history import History
 from utility.cogs_enum import Cogs
 from utility.db import DB
 
@@ -36,6 +37,7 @@ def add_cogs():
     bot.add_cog(Roles(bot))
     bot.add_cog(Quotes(bot))
     bot.add_cog(ArtCrawler(bot))
+    bot.add_cog(History(bot))
 
 
 add_cogs()
