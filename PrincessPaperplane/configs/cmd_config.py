@@ -37,3 +37,4 @@ class STRINGS(Enum):
 	
 	QUOTE_MESSAGE = "'{TEXT}' -{AUTHOR}"
 
+	QUOTE_MESSAGE = "\"{TEXT}\" - {AUTHOR}"
