@@ -1,5 +1,6 @@
 import asyncio
 import time
+import traceback
 from random import randint
 from typing import Optional
 
@@ -16,7 +17,7 @@ from utility.db import DB
 class Rank(commands.Cog):
     def __init__(self, bot : commands.Bot):
         self.bot = bot
-        self.DB : DB = bot.get_cog(Cogs.DB)
+        self.DB : DB = bot.get_cog(Cogs.DB.value)
         self.base_xp = xp_config.BASE
         self.random_xp_range = xp_config.RANDOM_RANGE
 
@@ -180,7 +181,7 @@ class Rank(commands.Cog):
         ext = ""
         if guild.id == guild_config.SERVER_TEST:
             ext = "&test"
-        url = str(STRINGS.RANK_IMAGE_GENERATOR_URL).format(AUTHOR_ID=author.id, TIME=time.time(), EXT=ext)
+        url = STRINGS.RANK_IMAGE_GENERATOR_URL.value.format(AUTHOR_ID=author.id, TIME=time.time(), EXT=ext)
 
         next_level = level + 1
         nextLevelUp = self.get_levelup_threshold(level)
@@ -188,7 +189,7 @@ class Rank(commands.Cog):
 
         # embed current XP, level and missing XP for next levelup
         title = STRINGS.RANK_EMBED_TITLE.value.format(LEVEL=level)
-        description = STRINGS.RANK_EMBED_DESCRIPTION.value.format(EXP=exp, NEXT_LEVEL=next_level, EXP_LEVEL=exp_left)
+        description = STRINGS.RANK_EMBED_DESCRIPTION.value.format(EXP=exp, NEXT_LEVEL=next_level, EXP_LEFT=exp_left)
         colour = author.top_role.colour
 
         embed = Embed(title=title, description=description, colour=colour)

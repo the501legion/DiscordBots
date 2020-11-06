@@ -6,23 +6,22 @@ import sys
 import os
 
 # import modules
-from pathlib import Path
+
+import traceback
 
 import discord
 from discord.ext import commands
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 
-from cmds.Quotes.Discord import Quotes
+import configs.cmd_config as cmd_config
+import configs.guild_config as guild_config
+import configs.roles_config as roles_config
 from cmds.dice import Dice
 from cmds.rank import Rank
 from cmds.roles import Roles
-from configs import cmd_config, guild_config, roles_config
-from configs.twitch_config import Mappings, twitch_chat
+from ext import load_extensions
 from utility.cogs_enum import Cogs
 from utility.db import DB
-
-# load environment variables
-load_dotenv(dotenv_path=Path('.') / '.env')
 
 # create bot
 bot = commands.Bot(command_prefix=cmd_config.PREFIXES)
@@ -34,16 +33,12 @@ def add_cogs():
     bot.add_cog(Rank(bot))
     bot.add_cog(Dice(bot))
     bot.add_cog(Roles(bot))
-    bot.add_cog(Quotes(bot))
 
 
 add_cogs()
 
 DB: DB = bot.get_cog(Cogs.DB.value)
 ROLES: Roles = bot.get_cog(Cogs.ROLES.value)
-
-# Discord API key
-API_KEY = os.getenv("DISCORD.API_KEY")
 
 prefixes_regex = '(' + "|".join(bot.command_prefix) + ')'
 DICE_CMD_REGEX = re.compile(r"^({prefix})([w,d])".format(prefix=prefixes_regex))
@@ -52,36 +47,33 @@ DICE_CMD_REGEX = re.compile(r"^({prefix})([w,d])".format(prefix=prefixes_regex))
 # start bot
 @bot.event
 async def on_ready():
-    bot.user.name = "PaperBot"
+    try:
+        bot.user.name = "PaperBot"
 
-    DB.log('Bot started')
-    print('------')
-    print('DB.logged in as')
-    print(bot.user.name)
-    print(bot.user.id)
-    print('------')
+        DB.log('Bot started')
+        print('------')
+        print('DB.logged in as')
+        print(bot.user.name)
+        print(bot.user.id)
+        print('------')
 
-    print('Connected to')
-    for guild in bot.guilds:
-        print("- " + guild.name)
+        print('Connected to')
+        for guild in bot.guilds:
+            print("- " + guild.name)
 
-    await bot.change_presence(status=discord.Status.online,
-                              activity=discord.Activity(name='twitch.tv/princesspaperplane',
-                                                        type=discord.ActivityType.watching))
+        await bot.change_presence(status=discord.Status.online,
+                                  activity=discord.Activity(name='twitch.tv/princesspaperplane',
+                                                            type=discord.ActivityType.watching))
 
-    print('------')
-    print('Init twitch command mapping')
+        print('------')
+        print('Loading Extensions')
+        load_extensions(bot)
 
-    for module in Mappings.keys():
-        print(f'Start Mapping for: {module}')
-
-        for mapng in Mappings[module]:
-            twitch_chat.subscribe(mapng)
-            print(f'{mapng.__name__} was successful mapped')
-
-    print('------')
-
-    await ROLES.update_reaction_msg(guild_config.ROLE_CHANNEL, roles_config.EMOTE_ROLES)
+        print('------')
+        await ROLES.update_reaction_msg(guild_config.ROLE_CHANNEL, roles_config.EMOTE_ROLES)
+        # await ROLES.update_reaction_msg(os.getenv("DISCORD.CHANNEL.ROLE.LIVE"), roles_config.EMOTE_ROLES)
+    except Exception:
+        DB.log("Error: " + traceback.format_exc())
 
 
 @bot.event
@@ -106,6 +98,9 @@ def main():
             guild_config.SERVER = guild_config.SERVER_TEST
             guild_config.ROLE_CHANNEL = guild_config.ROLE_CHANNEL_TEST
             roles_config.EMOTE_ROLES = roles_config.EMOTE_ROLES_TEST
+
+    load_dotenv(find_dotenv())
+    API_KEY = os.getenv("DISCORD.API_KEY")
 
     # RUN BOT
     bot.run(API_KEY)
