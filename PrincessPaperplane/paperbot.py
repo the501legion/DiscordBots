@@ -80,10 +80,11 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
+    print("on_message")
     await handle_command(message)
 
-
 async def handle_command(message):
+    print("Handle Command")
     # Handle command stuff
     match = DICE_CMD_REGEX.match(message.content)
     if bool(match):
@@ -94,12 +95,15 @@ async def handle_command(message):
 
 
 def main():
+    print("Starting ...")
+
     # print command line arguments
     for arg in sys.argv[1:]:
         if arg == "-test":
             guild_config.SERVER = guild_config.SERVER_TEST
             guild_config.ROLE_CHANNEL = guild_config.ROLE_CHANNEL_TEST
             roles_config.EMOTE_ROLES = roles_config.EMOTE_ROLES_TEST
+            print("Starting on testing environment")
 
     load_dotenv(find_dotenv())
     API_KEY = os.getenv("DISCORD.API_KEY")

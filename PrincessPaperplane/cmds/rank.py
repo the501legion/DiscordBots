@@ -42,8 +42,6 @@ class Rank(commands.Cog):
         if message.content == "" or len(message.content) == 0:
             return
 
-        string = "[" + guild.name + "] " + author.name + " (#" + channel.name + "): " + message.content #TODO: What is this for?
-
         db = self.DB.connect()
         cur = db.cursor()
         db.autocommit(True)
