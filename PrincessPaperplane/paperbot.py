@@ -25,7 +25,8 @@ from utility.cogs_enum import Cogs
 from utility.db import DB
 
 # create bot
-bot = commands.Bot(command_prefix=cmd_config.PREFIXES)
+intents = discord.Intents.all()
+bot = commands.Bot(command_prefix=cmd_config.PREFIXES, intents=intents)
 
 
 # Add cogs
@@ -81,6 +82,9 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     print("on_message")
+    if message.guild.id != guild_config.SERVER:
+        return
+        
     await handle_command(message)
 
 async def handle_command(message):
