@@ -8,3 +8,4 @@ HTTP_CODES = {
 
 def load_extensions(bot):
     bot.load_extension("ext.twitter_crawler")
+    bot.load_extension("ext.ucl")
