@@ -43,7 +43,7 @@ DB: DB = bot.get_cog(Cogs.DB.value)
 ROLES: Roles = bot.get_cog(Cogs.ROLES.value)
 
 prefixes_regex = '(' + "|".join(bot.command_prefix) + ')'
-DICE_CMD_REGEX = re.compile(r"^({prefix})([w,d])".format(prefix=prefixes_regex))
+DICE_CMD_REGEX = re.compile(r"^({prefix})([w,d]\d)".format(prefix=prefixes_regex))
 
 
 # start bot
@@ -83,14 +83,17 @@ async def on_message(message):
     print("on_message")
     await handle_command(message)
 
+
 async def handle_command(message):
     print("Handle Command")
+
     # Handle command stuff
     match = DICE_CMD_REGEX.match(message.content)
     if bool(match):
         # Split message content: !w6x8 becomes !w 6x8. Important for command extension, so it can extract parameters
         cmd_length = len(match.group(1)) + len(match.group(2))
         message.content = message.content[:cmd_length] + " " + message.content[cmd_length:]
+
     await bot.process_commands(message)
 
 
