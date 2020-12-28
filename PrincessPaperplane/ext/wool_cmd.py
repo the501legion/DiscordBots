@@ -1,9 +1,10 @@
 from discord.ext import commands
 from discord.ext.commands import Bot, Context
+from typing import List
 
 # configs
-ALIASES: list[str] = ['wool', 'wolle', 'wa']
-USER: int = 255003995871903745
+ALIASES: List[str] = ['wool', 'wolle', 'wa']
+USER: int = 168781680864133120
 MESSAGE: str = "***Achtung!** {MENTION} will wieder Wolle kaufen!*"
 
 
