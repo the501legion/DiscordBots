@@ -27,7 +27,7 @@ jobs:
         cp ../../../.env PrincessPaperplane/.
     - name: Run code
       run: |
-        chmod +x run.sh
+        chmod +x run-test.sh
         echo "Prepare run"
-        ./run.sh
+        ./run-test.sh
         echo "Finish run"
