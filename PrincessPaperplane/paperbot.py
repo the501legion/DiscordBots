@@ -10,6 +10,7 @@ import os
 import traceback
 
 import discord
+from attr import define
 from discord.ext import commands
 from dotenv import load_dotenv, find_dotenv
 
@@ -83,7 +84,7 @@ async def on_ready():
 async def on_message(message):
     print("on_message")
     if message.guild.id != guild_config.SERVER:
-        return
+        pass
         
     await handle_command(message)
 

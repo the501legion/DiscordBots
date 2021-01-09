@@ -50,8 +50,11 @@ async def tweet_handler(bot, queue: Queue):
 
 
 def setup(bot):
-    print("> Loading twitter crawler")
-    q = Queue()
+    if os.getenv("TWITTER.TIMER") is not None:
+        print("> Loading twitter crawler")
+        q = Queue()
 
-    threading.Thread(target=fetch_tweets, args=(q,)).start()
-    tweet_handler.start(bot, q)
+        threading.Thread(target=fetch_tweets, args=(q,)).start()
+        tweet_handler.start(bot, q)
+    else:
+        print("> Unable to load twitter crawler")
