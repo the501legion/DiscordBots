@@ -34,7 +34,7 @@ class Roles(commands.Cog):
     async def update_reaction_msg(self, roleChannel, emote_roles : List[EmoteRoleSettings]):
         channel : TextChannel = self.bot.get_channel(id=roleChannel)
         guild : Guild = channel.guild
-        msg : Message
+        msg : Message = None
         
         async for message in channel.history(limit=200):
             if message.author == self.bot.user:
@@ -65,15 +65,29 @@ class Roles(commands.Cog):
         if payload.channel_id == guild_config.ROLE_CHANNEL:
             emoji : Emoji = payload.emoji
             guild : Guild = self.bot.get_guild(id=payload.guild_id)
-            user : Member = guild.get_member(user_id=payload.user_id)
+            user : Member = None
             emote_roles : List[EmoteRoleSettings]
             level = 0
             level_channel : TextChannel
 
+            self.DB.log("Check guild %s" % (guild.name))
+            self.DB.log("Check members")
+            for member in guild.members:
+                self.DB.log("Check member %s" %(member.name))
+
+                if member.id == payload.user_id:
+                    self.DB.log("User found")
+                    user = member
+                    break
+
             if user == self.bot.user:
                 return
 
-            db = self.DB.dbConnect()
+            if user == None:
+                self.DB.log("User is null (User-ID %d, Guild %s) in handle_role_reactions" % (payload.user_id, guild))
+                return
+
+            db = self.DB.connect()
             cur = db.cursor()
             db.autocommit(True)
 

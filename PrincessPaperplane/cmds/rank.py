@@ -1,5 +1,6 @@
 import asyncio
 import time
+import traceback
 from random import randint
 from typing import Optional
 
@@ -16,7 +17,7 @@ from utility.db import DB
 class Rank(commands.Cog):
     def __init__(self, bot : commands.Bot):
         self.bot = bot
-        self.DB : DB = bot.get_cog(Cogs.DB)
+        self.DB : DB = bot.get_cog(Cogs.DB.value)
         self.base_xp = xp_config.BASE
         self.random_xp_range = xp_config.RANDOM_RANGE
 
@@ -40,8 +41,6 @@ class Rank(commands.Cog):
 
         if message.content == "" or len(message.content) == 0:
             return
-
-        string = "[" + guild.name + "] " + author.name + " (#" + channel.name + "): " + message.content #TODO: What is this for?
 
         db = self.DB.connect()
         cur = db.cursor()
@@ -85,17 +84,17 @@ class Rank(commands.Cog):
                             cur.execute("SELECT rewardRole FROM level_reward_test WHERE rewardLevel = %s", (level,))
 
                         if cur.rowcount > 0:
-                            role = guild.get_role(role_id=int(cur.fetchone()[0]))
+                            roleId = int(cur.fetchone()[0])
+                            role = guild.get_role(role_id=roleId)
 
                             # give user new role as reward
                             if role not in author.roles:
                                 self.DB.log("Assign " + author.name + " new role " + role.name)
                                 await author.add_roles(role)
 
-                            await level_channel.send(author.mention + " Du hast eine neue Stufe erreicht und erhältst den neuen Rang " + role.name + "!")
-
                             # remove old reward-roles
                             if guild.id == guild_config.SERVER_LIVE:
+                                await level_channel.send(author.mention + " Du hast eine neue Stufe erreicht und erhältst den neuen Rang " + role.name + "!")
                                 cur.execute("SELECT rewardRole FROM level_reward WHERE rewardLevel < %s AND rewardLevel > 1", (level,))
                             if guild.id == guild_config.SERVER_TEST:
                                 cur.execute("SELECT rewardRole FROM level_reward_test WHERE rewardLevel < %s AND rewardLevel > 1", (level,))
@@ -180,7 +179,7 @@ class Rank(commands.Cog):
         ext = ""
         if guild.id == guild_config.SERVER_TEST:
             ext = "&test"
-        url = str(STRINGS.RANK_IMAGE_GENERATOR_URL).format(AUTHOR_ID=author.id, TIME=time.time(), EXT=ext)
+        url = STRINGS.RANK_IMAGE_GENERATOR_URL.value.format(AUTHOR_ID=author.id, TIME=time.time(), EXT=ext)
 
         next_level = level + 1
         nextLevelUp = self.get_levelup_threshold(level)
@@ -188,7 +187,7 @@ class Rank(commands.Cog):
 
         # embed current XP, level and missing XP for next levelup
         title = STRINGS.RANK_EMBED_TITLE.value.format(LEVEL=level)
-        description = STRINGS.RANK_EMBED_DESCRIPTION.value.format(EXP=exp, NEXT_LEVEL=next_level, EXP_LEVEL=exp_left)
+        description = STRINGS.RANK_EMBED_DESCRIPTION.value.format(EXP=exp, NEXT_LEVEL=next_level, EXP_LEFT=exp_left)
         colour = author.top_role.colour
 
         embed = Embed(title=title, description=description, colour=colour)

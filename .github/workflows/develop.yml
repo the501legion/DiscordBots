@@ -1,0 +1,33 @@
+# This workflow will install Python dependencies, run tests and lint with a single version of Python
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
+
+name: Develop
+
+on:
+  push:
+    branches: [ develop ]
+  pull_request:
+    branches: [ develop ]
+
+jobs:
+  build:
+
+    runs-on: [self-hosted]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Display Python version
+      run: |
+        python3 -c "import sys; print(sys.version)"
+    - name: Update PIP
+      run: |
+        python3 -m pip install --upgrade pip
+    - name: Copy credentials
+      run: |
+        cp ../../../.env PrincessPaperplane/.
+    - name: Run code
+      run: |
+        chmod +x run-test.sh
+        echo "Prepare run"
+        ./run-test.sh
+        echo "Finish run"
