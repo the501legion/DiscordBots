@@ -1,12 +1,9 @@
 #!/usr/bin/python3
 # coding=utf-8
 
+import os
 import re  # Regex
 import sys
-import os
-
-# import modules
-
 import traceback
 
 import discord
@@ -23,6 +20,8 @@ from cmds.roles import Roles
 from ext import load_extensions
 from utility.cogs_enum import Cogs
 from utility.db import DB
+
+# import modules
 
 # create bot
 intents = discord.Intents.all()
@@ -69,10 +68,6 @@ async def on_ready():
                                                             type=discord.ActivityType.watching))
 
         print('------')
-        print('Loading Extensions')
-        load_extensions(bot)
-
-        print('------')
         await ROLES.update_reaction_msg(guild_config.ROLE_CHANNEL, roles_config.EMOTE_ROLES)
         # await ROLES.update_reaction_msg(os.getenv("DISCORD.CHANNEL.ROLE.LIVE"), roles_config.EMOTE_ROLES)
     except Exception:
@@ -83,7 +78,7 @@ async def on_ready():
 async def on_message(message):
     print("on_message")
     if message.guild.id != guild_config.SERVER:
-        return
+        pass
         
     await handle_command(message)
 
@@ -111,6 +106,11 @@ def main():
             guild_config.ROLE_CHANNEL = guild_config.ROLE_CHANNEL_TEST
             roles_config.EMOTE_ROLES = roles_config.EMOTE_ROLES_TEST
             print("Starting on testing environment")
+
+    # REGISTER EXTENSIONS
+    print('------')
+    print('Loading Extensions')
+    load_extensions(bot)
 
     load_dotenv(find_dotenv())
     API_KEY = os.getenv("DISCORD.API_KEY")

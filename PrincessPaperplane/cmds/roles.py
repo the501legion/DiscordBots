@@ -69,14 +69,10 @@ class Roles(commands.Cog):
             emote_roles : List[EmoteRoleSettings]
             level = 0
             level_channel : TextChannel
-
-            self.DB.log("Check guild %s" % (guild.name))
-            self.DB.log("Check members")
+            
             for member in guild.members:
-                self.DB.log("Check member %s" %(member.name))
 
                 if member.id == payload.user_id:
-                    self.DB.log("User found")
                     user = member
                     break
 

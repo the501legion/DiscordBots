@@ -18,12 +18,13 @@ class DB(commands.Cog):
         Returns:
             [type]: Connection to database
         """
-        return MySQLdb.connect(host=secret.DB_HOST,
-        user=os.getenv("DATABASE.USER"),
-        charset=db_config.DB_CHARSET,
-        use_unicode=db_config.DB_UNICODE,
-        passwd=os.getenv("DATABASE.PASSWD"),
-        db=os.getenv("DATABASE.DB"))
+        return MySQLdb.connect(host=os.getenv("DATABASE.HOST"),
+                               port=3306,
+                               user=os.getenv("DATABASE.USER"),
+                               charset=db_config.DB_CHARSET,
+                               use_unicode=db_config.DB_UNICODE,
+                               passwd=os.getenv("DATABASE.PASSWD"),
+                               db=os.getenv("DATABASE.DB"))
     
     def log(self, text: str):
         """Log text in console and in database
@@ -42,5 +43,5 @@ class DB(commands.Cog):
             else:
                 cur.execute("INSERT INTO log_info (`text`, `time`) VALUES (%s, %s)", (text, time.time(), ))
         except Exception as e:
-            self.log("Exception in log: " + str(e))
-            pass
+            # self.log("Exception in log: " + str(e))
+            print("Exception in log: " + str(e))
