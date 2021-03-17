@@ -1,11 +1,14 @@
 import random
 
+import twitch
 from discord.ext import commands
-from discord.ext.commands import Context, Cog
+from discord.ext.commands import Context, Cog, Bot
 
-from ext.quotly import ROLES_WITH_WRITE_ACCESS
 from ext.quotly.quote import Quote, EMPTY
+from ext.twitch import Twitch
 from utility.cogs_enum import Cogs
+
+ROLES_WITH_WRITE_ACCESS = []
 
 
 async def post_quote(ctx: Context, quote: Quote):
@@ -14,9 +17,31 @@ async def post_quote(ctx: Context, quote: Quote):
 
 
 class Quotly(Cog):
-    def __init__(self, bot):
+    def __init__(self, bot: Bot):
         self.bot = bot
         self.DB = bot.get_cog(Cogs.DB.value)
+
+        if not self.DB.exist("quotes"):
+            self.setup()
+
+        self.twitch: Twitch = bot.get_cog(Cogs.TWITCH.value)
+        self.twitch.twitch_chat.subscribe(self.twitch_command_mapping)
+
+    def setup(self) -> None:
+        database = self.DB.connect()
+
+        try:
+            cursor = database.cursor()
+            database.autocommit(True)
+
+            cursor.execute(
+                "create table quotes(id int auto_increment primary key, quote text not null, author text not null);")
+
+        except Exception as e:
+            self.DB.log(str(e))
+
+        finally:
+            database.close()
 
     def fetch_quote(self) -> Quote:
         database = self.DB.connect()
@@ -56,6 +81,21 @@ class Quotly(Cog):
         finally:
             database.close()
 
+    def twitch_command_mapping(self, message: twitch.chat.Message) -> None:
+        if message.text == '!quote':
+            q = self.fetch_quote()
+            message.chat.send(f'/me "{q.text}" -{q.author}')
+
+        if message.text.startswith('!quote add'):
+            tmp = message.text.removeprefix('!quote add').strip().split(maxsplit=1)
+
+            if message.text == '!quote add' or len(tmp) < 2:
+                return message.chat.send(f'/me @{message.sender} Missing Parameter!')
+
+            r = message.text.split(" ", 2)
+            q = self.store_quote(r[1], r[2])
+            return message.chat.send(f'/me @{message.sender} added a new quote from {q.author}.')
+
     @commands.group(aliases=['quote', 'q'])
     async def cmd_quote(self, ctx: Context):
         if ctx.invoked_subcommand is None:
@@ -78,4 +118,8 @@ class Quotly(Cog):
             await ctx.send('You are not allowed to use this, {MENTION}'.format(MENTION=ctx.author.mention))
 
     async def get_quote(self, ctx: Context):
-        await post_quote(ctx, self.fetch_quote())
+        quote: Quote = self.fetch_quote()
+        if quote is EMPTY:
+            return await ctx.channel.send("Found no quote. Add one with !quote add <author> <quote>")
+
+        await post_quote(ctx, quote)
