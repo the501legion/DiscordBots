@@ -65,12 +65,22 @@ class Roles(commands.Cog):
         if payload.channel_id == guild_config.ROLE_CHANNEL:
             emoji : Emoji = payload.emoji
             guild : Guild = self.bot.get_guild(id=payload.guild_id)
-            user : Member = guild.get_member(user_id=payload.user_id)
+            user : Member = None
             emote_roles : List[EmoteRoleSettings]
             level = 0
             level_channel : TextChannel
+            
+            for member in guild.members:
+
+                if member.id == payload.user_id:
+                    user = member
+                    break
 
             if user == self.bot.user:
+                return
+
+            if user == None:
+                self.DB.log("User is null (User-ID %d, Guild %s) in handle_role_reactions" % (payload.user_id, guild))
                 return
 
             db = self.DB.connect()
