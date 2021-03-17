@@ -12,8 +12,7 @@ ROLES_WITH_WRITE_ACCESS = []
 
 
 async def post_quote(ctx: Context, quote: Quote):
-    return await ctx.channel.send(
-        "Quote #{ID}:\r\n \"{TEXT}\" - {AUTHOR}".format(ID=quote.id, TEXT=quote.text, AUTHOR=quote.author))
+    return await ctx.channel.send("#{ID}: \"{TEXT}\" - {AUTHOR}".format(ID=quote.id, TEXT=quote.text, AUTHOR=quote.author))
 
 
 class Quotly(Cog):
@@ -25,7 +24,9 @@ class Quotly(Cog):
             self.setup()
 
         self.twitch: Twitch = bot.get_cog(Cogs.TWITCH.value)
-        self.twitch.twitch_chat.subscribe(self.twitch_command_mapping)
+
+        if self.twitch is not None:
+            self.twitch.twitch_chat.subscribe(self.twitch_command_mapping)
 
     def setup(self) -> None:
         database = self.DB.connect()
@@ -87,13 +88,12 @@ class Quotly(Cog):
             message.chat.send(f'/me "{q.text}" -{q.author}')
 
         if message.text.startswith('!quote add'):
-            tmp = message.text.removeprefix('!quote add').strip().split(maxsplit=1)
+            tmp = message.text.split('!quote add')[1].strip().split(maxsplit=1)
 
             if message.text == '!quote add' or len(tmp) < 2:
                 return message.chat.send(f'/me @{message.sender} Missing Parameter!')
 
-            r = message.text.split(" ", 2)
-            q = self.store_quote(r[1], r[2])
+            q = self.store_quote(tmp[1], tmp[0])
             return message.chat.send(f'/me @{message.sender} added a new quote from {q.author}.')
 
     @commands.group(aliases=['quote', 'q'])

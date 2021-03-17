@@ -7,6 +7,6 @@ HTTP_CODES = {
 
 
 def load_extensions(bot):
-    bot.load_extension("ext.quotly")
     # bot.load_extension("ext.twitch")
+    bot.load_extension("ext.quotly")
     # bot.load_extension("ext.twitter_crawler")
