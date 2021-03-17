@@ -30,6 +30,8 @@ class Rank(commands.Cog):
         channel : TextChannel = message.channel
         guild : Guild = message.guild
 
+        print("Guildname: ", guild.name)
+
         if author.id in guild_config.IGNORE_LIST:
             return
 
@@ -41,8 +43,6 @@ class Rank(commands.Cog):
 
         if message.content == "" or len(message.content) == 0:
             return
-
-        string = "[" + guild.name + "] " + author.name + " (#" + channel.name + "): " + message.content #TODO: What is this for?
 
         db = self.DB.connect()
         cur = db.cursor()
@@ -86,17 +86,17 @@ class Rank(commands.Cog):
                             cur.execute("SELECT rewardRole FROM level_reward_test WHERE rewardLevel = %s", (level,))
 
                         if cur.rowcount > 0:
-                            role = guild.get_role(role_id=int(cur.fetchone()[0]))
+                            roleId = int(cur.fetchone()[0])
+                            role = guild.get_role(role_id=roleId)
 
                             # give user new role as reward
                             if role not in author.roles:
                                 self.DB.log("Assign " + author.name + " new role " + role.name)
                                 await author.add_roles(role)
 
-                            await level_channel.send(author.mention + " Du hast eine neue Stufe erreicht und erhältst den neuen Rang " + role.name + "!")
-
                             # remove old reward-roles
                             if guild.id == guild_config.SERVER_LIVE:
+                                await level_channel.send(author.mention + " Du hast eine neue Stufe erreicht und erhältst den neuen Rang " + role.name + "!")
                                 cur.execute("SELECT rewardRole FROM level_reward WHERE rewardLevel < %s AND rewardLevel > 1", (level,))
                             if guild.id == guild_config.SERVER_TEST:
                                 cur.execute("SELECT rewardRole FROM level_reward_test WHERE rewardLevel < %s AND rewardLevel > 1", (level,))
@@ -195,5 +195,6 @@ class Rank(commands.Cog):
         embed = Embed(title=title, description=description, colour=colour)
         embed.set_author(name=author.name, icon_url=author.avatar_url_as(format="png"))
         embed.set_image(url=url)
+        print(url)
 
         return embed

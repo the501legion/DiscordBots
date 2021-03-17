@@ -24,7 +24,8 @@ from utility.cogs_enum import Cogs
 from utility.db import DB
 
 # create bot
-bot = commands.Bot(command_prefix=cmd_config.PREFIXES)
+intents = discord.Intents.all()
+bot = commands.Bot(command_prefix=cmd_config.PREFIXES, intents=intents)
 
 
 # Add cogs
@@ -41,7 +42,7 @@ DB: DB = bot.get_cog(Cogs.DB.value)
 ROLES: Roles = bot.get_cog(Cogs.ROLES.value)
 
 prefixes_regex = '(' + "|".join(bot.command_prefix) + ')'
-DICE_CMD_REGEX = re.compile(r"^({prefix})([w,d])".format(prefix=prefixes_regex))
+DICE_CMD_REGEX = re.compile(r"^({prefix})([w,d]\d)".format(prefix=prefixes_regex))
 
 
 # start bot
@@ -78,26 +79,36 @@ async def on_ready():
 
 @bot.event
 async def on_message(message):
+    print("on_message")
+    if message.guild.id != guild_config.SERVER:
+        return
+        
     await handle_command(message)
 
 
 async def handle_command(message):
+    print("Handle Command")
+
     # Handle command stuff
     match = DICE_CMD_REGEX.match(message.content)
     if bool(match):
         # Split message content: !w6x8 becomes !w 6x8. Important for command extension, so it can extract parameters
         cmd_length = len(match.group(1)) + len(match.group(2))
         message.content = message.content[:cmd_length] + " " + message.content[cmd_length:]
+
     await bot.process_commands(message)
 
 
 def main():
+    print("Starting ...")
+
     # print command line arguments
     for arg in sys.argv[1:]:
         if arg == "-test":
             guild_config.SERVER = guild_config.SERVER_TEST
             guild_config.ROLE_CHANNEL = guild_config.ROLE_CHANNEL_TEST
             roles_config.EMOTE_ROLES = roles_config.EMOTE_ROLES_TEST
+            print("Starting on testing environment")
 
     load_dotenv(find_dotenv())
     API_KEY = os.getenv("DISCORD.API_KEY")
