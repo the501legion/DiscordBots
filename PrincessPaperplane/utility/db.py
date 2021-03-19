@@ -19,12 +19,30 @@ class DB(commands.Cog):
             [type]: Connection to database
         """
         return MySQLdb.connect(host=secret.DB_HOST,
-        user=os.getenv("DATABASE.USER"),
-        charset=db_config.DB_CHARSET,
-        use_unicode=db_config.DB_UNICODE,
-        passwd=os.getenv("DATABASE.PASSWD"),
-        db=os.getenv("DATABASE.DB"))
-    
+                               user=os.getenv("DATABASE.USER"),
+                               charset=db_config.DB_CHARSET,
+                               use_unicode=db_config.DB_UNICODE,
+                               passwd=os.getenv("DATABASE.PASSWD"),
+                               db=os.getenv("DATABASE.DB"))
+
+    def exist(self, table: str) -> bool:
+        db = self.connect()
+
+        try:
+            cursor = db.cursor()
+            db.autocommit(True)
+            cursor.execute("SHOW TABLES LIKE %s", (table,))
+            if cursor.rowcount > 0:
+                return True
+
+        except Exception as e:
+            print(str(e))
+
+        finally:
+            db.close()
+
+        return False
+
     def log(self, text: str):
         """Log text in console and in database
 
@@ -38,9 +56,9 @@ class DB(commands.Cog):
             cur = db.cursor()
             db.autocommit(True)
             if guild_config.SERVER == guild_config.SERVER_TEST:
-                cur.execute("INSERT INTO log_info_test (`text`, `time`) VALUES (%s, %s)", (text, time.time(), ))
+                cur.execute("INSERT INTO log_info_test (`text`, `time`) VALUES (%s, %s)", (text, time.time(),))
             else:
-                cur.execute("INSERT INTO log_info (`text`, `time`) VALUES (%s, %s)", (text, time.time(), ))
+                cur.execute("INSERT INTO log_info (`text`, `time`) VALUES (%s, %s)", (text, time.time(),))
         except Exception as e:
             self.log("Exception in log: " + str(e))
             pass

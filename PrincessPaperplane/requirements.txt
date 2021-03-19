@@ -1,0 +1,6 @@
+twitch-python~=0.0.18
+
+discord~=1.0.1
+requests~=2.25.1
+python-dotenv~=0.15.0
+mysqlclient~=2.0.3

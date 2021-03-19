@@ -6,5 +6,6 @@ class Cogs(Enum):
     RANK = 'Rank'
     DICE = 'Dice'
     ROLES = 'Roles'
-    QUOTES = 'Quotes'
     CRAWLER = 'ArtCrawler'
+    QUOTES = 'Quotly'
+    TWITCH = 'Twitch'

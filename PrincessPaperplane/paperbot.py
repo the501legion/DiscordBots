@@ -17,7 +17,6 @@ import configs.cmd_config as cmd_config
 import configs.guild_config as guild_config
 import configs.roles_config as roles_config
 from cmds.dice import Dice
-from cmds.quotes import Quotes
 from cmds.rank import Rank
 from cmds.roles import Roles
 from ext import load_extensions
@@ -35,7 +34,6 @@ def add_cogs():
     bot.add_cog(Rank(bot))
     bot.add_cog(Dice(bot))
     bot.add_cog(Roles(bot))
-    bot.add_cog(Quotes(bot))
 
 
 add_cogs()
