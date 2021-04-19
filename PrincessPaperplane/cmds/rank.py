@@ -78,6 +78,7 @@ class Rank(commands.Cog):
                     if exp >= levelUp:
                         level = level + 1
                         exp = 0
+                        leveledUp = True
 
                     # check for reward
                     if guild.id == guild_config.SERVER_LIVE:
