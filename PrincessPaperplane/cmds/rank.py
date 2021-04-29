@@ -70,6 +70,7 @@ class Rank(commands.Cog):
                 if expTime + 60 <= time.time():
                     addedExp = self.calc_xp_reward()
                     exp = exp + addedExp
+                    leveledUp = False
 
                     levelUp = self.get_levelup_threshold(level)
 
@@ -79,34 +80,37 @@ class Rank(commands.Cog):
                     if exp >= levelUp:
                         level = level + 1
                         exp = 0
+                        leveledUp = True
 
+                    # check for reward
+                    if guild.id == guild_config.SERVER_LIVE:
+                        cur.execute("SELECT rewardRole FROM level_reward WHERE rewardLevel = %s", (level,))
+                    if guild.id == guild_config.SERVER_TEST:
+                        cur.execute("SELECT rewardRole FROM level_reward_test WHERE rewardLevel = %s", (level,))
+
+                    if cur.rowcount > 0:
+                        roleId = int(cur.fetchone()[0])
+                        role = guild.get_role(role_id=roleId)
+
+                        # give user new role as reward
+                        if role not in author.roles:
+                            self.DB.log("Assign " + author.name + " new role " + role.name)
+                            await author.add_roles(role)
+
+                        # remove old reward-roles
                         if guild.id == guild_config.SERVER_LIVE:
-                            cur.execute("SELECT rewardRole FROM level_reward WHERE rewardLevel = %s", (level,))
-                        if guild.id == guild_config.SERVER_TEST:
-                            cur.execute("SELECT rewardRole FROM level_reward_test WHERE rewardLevel = %s", (level,))
-
-                        if cur.rowcount > 0:
-                            roleId = int(cur.fetchone()[0])
-                            role = guild.get_role(role_id=roleId)
-
-                            # give user new role as reward
-                            if role not in author.roles:
-                                self.DB.log("Assign " + author.name + " new role " + role.name)
-                                await author.add_roles(role)
-
-                            # remove old reward-roles
-                            if guild.id == guild_config.SERVER_LIVE:
+                            if leveledUp == True:
                                 await level_channel.send(author.mention + " Du hast eine neue Stufe erreicht und erhältst den neuen Rang " + role.name + "!")
-                                cur.execute("SELECT rewardRole FROM level_reward WHERE rewardLevel < %s AND rewardLevel > 1", (level,))
-                            if guild.id == guild_config.SERVER_TEST:
-                                cur.execute("SELECT rewardRole FROM level_reward_test WHERE rewardLevel < %s AND rewardLevel > 1", (level,))
+                            cur.execute("SELECT rewardRole FROM level_reward WHERE rewardLevel < %s AND rewardLevel > 1", (level,))
+                        if guild.id == guild_config.SERVER_TEST:
+                            cur.execute("SELECT rewardRole FROM level_reward_test WHERE rewardLevel < %s AND rewardLevel > 1", (level,))
 
-                            rows = cur.fetchall()
-                            for row in rows:
-                                role = guild.get_role(role_id=int(row[0]))
-                                if role in author.roles:
-                                    self.DB.log("Remove " + author.name + " old role " + role.name)
-                                    await author.remove_roles(role)
+                        rows = cur.fetchall()
+                        for row in rows:
+                            role = guild.get_role(role_id=int(row[0]))
+                            if role in author.roles:
+                                self.DB.log("Remove " + author.name + " old role " + role.name)
+                                await author.remove_roles(role)
 
                     # update user in database with new XP (+ level)
                     if guild.id == guild_config.SERVER_LIVE:
