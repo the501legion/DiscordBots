@@ -15,7 +15,6 @@ EMOTE_ROLES : List[EmoteRoleSettings]  = [
   EmoteRoleSettings(763374893572030464,"🎨",":art: um Künstler:in zu werden."),
   EmoteRoleSettings(763374952304082964,"🎬",":clapper: um Cineast:in zu werden."),
   EmoteRoleSettings(763375031874748449,"📖",":book: wenn Du zum Buchclub gehören möchtest."),
-  EmoteRoleSettings(763375085704577034,"🗣️",":speaking_head: wenn Du das #kämmerlein sehen möchtest."),
   EmoteRoleSettings(763375132831121409,"🚀",":rocket: wenn Du mit among us spielen möchtest."),
   EmoteRoleSettings(763375172996562945,"🎲",":game_die: wenn Du Tabletop Simulator spielen möchtest."),
   EmoteRoleSettings(763375221201567774,"🎭",":performing_arts: wenn Du Dich für Pen & Paper interessierst.")
