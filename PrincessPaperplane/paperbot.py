@@ -55,7 +55,7 @@ async def on_ready():
 
         DB.log('Bot started')
         print('------')
-        print('DB.logged in as')
+        print('logged in as')
         print(bot.user.name)
         print(bot.user.id)
         print('------')
