@@ -6,8 +6,7 @@ from cmds.roles import EmoteRoleSettings
 
 # level requirements for roles
 ROLES_LEVEL = {
-    763105108841332766 : 5,
-    763375085704577034 : 5
+    763105108841332766 : 5
 }
 
 # roles which will be given by emote
