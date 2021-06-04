@@ -73,7 +73,8 @@ async def on_ready():
         load_extensions(bot)
 
         print('------')
-        await ROLES.update_reaction_msg(guild_config.ROLE_CHANNEL, roles_config.EMOTE_ROLES)
+        if guild_config.SERVER_LIVE in bot.guilds:
+            await ROLES.update_reaction_msg(guild_config.ROLE_CHANNEL, roles_config.EMOTE_ROLES)
         # await ROLES.update_reaction_msg(os.getenv("DISCORD.CHANNEL.ROLE.LIVE"), roles_config.EMOTE_ROLES)
     except Exception:
         DB.log("Error: " + traceback.format_exc())
@@ -113,6 +114,8 @@ def main():
             print("Starting on testing environment")
 
     load_dotenv(find_dotenv())
+    print(os.getenv("DATABASE.HOST"))
+    print(os.getenv("DISCORD.API_KEY"))
     API_KEY = os.getenv("DISCORD.API_KEY")
 
     # RUN BOT
