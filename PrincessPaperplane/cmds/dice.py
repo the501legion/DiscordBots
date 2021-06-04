@@ -5,6 +5,7 @@ import configs.cmd_config as cmd_config
 from discord.ext import commands
 from configs.cmd_config import STRINGS, ALIASES
 
+
 class Dice(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.bot = bot
@@ -31,3 +32,5 @@ class Dice(commands.Cog):
                 content = content + ", "
             content = content + str(randint(1, dice))
         await ctx.channel.send(content=content)
+
+    
