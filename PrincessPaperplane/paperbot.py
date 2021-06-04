@@ -74,6 +74,7 @@ async def on_ready():
                                                             type=discord.ActivityType.watching))
 
         print('------')
+        bot.loop.create_task(check_time())
         print('Loading Extensions')
         load_extensions(bot)
 
@@ -81,7 +82,7 @@ async def on_ready():
         if guild_config.SERVER_LIVE in bot.guilds:
             await ROLES.update_reaction_msg(guild_config.ROLE_CHANNEL, roles_config.EMOTE_ROLES)
         # await ROLES.update_reaction_msg(os.getenv("DISCORD.CHANNEL.ROLE.LIVE"), roles_config.EMOTE_ROLES)
-        bot.loop.create_task(check_time())
+        
     except Exception:
         DB.log("Error: " + traceback.format_exc())
 
@@ -89,8 +90,7 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     print("on_message")
-    if message.guild.id != guild_config.SERVER:
-        return
+    
 
     await handle_command(message)
 
@@ -110,11 +110,11 @@ async def handle_command(message):
 
 
 async def check_time():
-    channel = bot.get_channel(837415485964288112)
+    channel = bot.get_channel(768126859673731083)
     while True:
         now = datetime.datetime.now()
         print(now.hour, now.minute)
-        if now.hour == 18 and now.minute == 30:
+        if now.hour == 3 and now.minute == 0:
             await purge(channel)
         await asyncio.sleep(60)
 
