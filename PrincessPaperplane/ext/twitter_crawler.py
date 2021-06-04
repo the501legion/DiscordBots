@@ -27,6 +27,9 @@ def fetch_tweets(queue: Queue):
 
 @tasks.loop(seconds=int(os.getenv('TWITTER.TIMER', 60)))
 async def tweet_handler(bot, queue: Queue):
+    if os.getenv('TWITTER.CHANNEL.CONFIRM') == "":
+        return
+        
     channel: TextChannel = bot.get_channel(id=int(os.getenv('TWITTER.CHANNEL.CONFIRM')))
     if queue.qsize() > 0:
         tweet = queue.get(False)

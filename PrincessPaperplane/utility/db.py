@@ -18,7 +18,7 @@ class DB(commands.Cog):
         Returns:
             [type]: Connection to database
         """
-        return MySQLdb.connect(host=secret.DB_HOST,
+        return MySQLdb.connect(host=os.getenv("DATABASE.HOST"),
         user=os.getenv("DATABASE.USER"),
         charset=db_config.DB_CHARSET,
         use_unicode=db_config.DB_UNICODE,
