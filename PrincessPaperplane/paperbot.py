@@ -110,12 +110,14 @@ async def handle_command(message):
 
 
 async def check_time():
-    channel = bot.get_channel(422682961452728320)
+    channel = bot.get_channel(guild_config.BOT_CHANNEL)
+    chamber = bot.get_channel(guild_config.CHAMBER_CHANNEL)
     while True:
         now = datetime.datetime.now()
         print(now.hour, now.minute)
         if now.hour == 3 and now.minute == 0:
             await purge(channel)
+            await purge(chamber)
         await asyncio.sleep(60)
 
     
