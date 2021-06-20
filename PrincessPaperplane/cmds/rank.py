@@ -34,7 +34,7 @@ class Rank(commands.Cog):
             return
 
         level_channel : TextChannel
-        level_channel = self.bot.get_channel(id=guild_config.LEVEL_CHANNEL)
+        level_channel = self.bot.get_channel(id=guild_config.BOT_CHANNEL)
 
         if author.id == self.bot.user.id:
             return

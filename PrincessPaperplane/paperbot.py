@@ -110,7 +110,7 @@ async def handle_command(message):
 
 
 async def check_time():
-    channel = bot.get_channel(768126859673731083)
+    channel = bot.get_channel(422682961452728320)
     while True:
         now = datetime.datetime.now()
         print(now.hour, now.minute)
@@ -118,6 +118,7 @@ async def check_time():
             await purge(channel)
         await asyncio.sleep(60)
 
+    
 async def purge(channel):
     await channel.purge()
     await channel.send("Beachten Sie mich nicht, ich putze hier nur.")
@@ -131,6 +132,9 @@ def main():
         if arg == "-test":
             guild_config.SERVER = guild_config.SERVER_TEST
             guild_config.ROLE_CHANNEL = guild_config.ROLE_CHANNEL_TEST
+            guild_config.BOT_CHANNEL = guild_config.BOT_CHANNEL_TEST
+            guild_config.CHAMBER_CHANNEL = guild_config.CHAMBER_CHANNEL_TEST
+            guild_config.MOD_ROLE = guild_config.MOD_ROLE_TEST
             roles_config.EMOTE_ROLES = roles_config.EMOTE_ROLES_TEST
             print("Starting on testing environment")
 
