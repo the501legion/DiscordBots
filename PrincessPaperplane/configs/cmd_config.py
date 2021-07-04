@@ -5,7 +5,8 @@ PREFIXES = ['!']
 class ALIASES(Enum):
 	RANK = ['rank', 'rang', 'level', 'lvl']
 	DICE = ['dice', 'w', 'd']
-
+	WIPE = ['wipe']
+	
 class STRINGS(Enum):
 	DICE_RESULT = "{MENTION} Du hast folgende Zahlen gewürfelt: " #Leave whitespace at end!
 	RANK_EMBED_TITLE = "Dein aktuelles Level: {LEVEL}"
