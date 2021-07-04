@@ -92,7 +92,7 @@ class Roles(commands.Cog):
             db.autocommit(True)
 
             emote_roles = roles_config.EMOTE_ROLES
-            level_channel = self.bot.get_channel(id=guild_config.LEVEL_CHANNEL)
+            level_channel = self.bot.get_channel(id=guild_config.BOT_CHANNEL)
 
             if payload.guild_id == guild_config.SERVER_LIVE:
                 cur.execute("SELECT level FROM user_info WHERE id = %s", (user.id,))
