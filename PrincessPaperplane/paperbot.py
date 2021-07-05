@@ -114,7 +114,7 @@ async def check_time():
     while True:
         now = datetime.datetime.now()
         print(now.hour, now.minute)
-        if now.hour == 3 and now.minute == 0:
+        if now.hour == 1 and now.minute == 0: # 3 o'clock because of time shift
             await purge(channel)
         await asyncio.sleep(60)
 
