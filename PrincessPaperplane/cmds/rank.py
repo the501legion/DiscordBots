@@ -30,6 +30,8 @@ class Rank(commands.Cog):
         channel : TextChannel = message.channel
         guild : Guild = message.guild
 
+        print("Guildname: ", guild.name)
+
         if author.id in guild_config.IGNORE_LIST:
             return
 
@@ -197,5 +199,6 @@ class Rank(commands.Cog):
         embed = Embed(title=title, description=description, colour=colour)
         embed.set_author(name=author.name, icon_url=author.avatar_url_as(format="png"))
         embed.set_image(url=url)
+        print(url)
 
         return embed
