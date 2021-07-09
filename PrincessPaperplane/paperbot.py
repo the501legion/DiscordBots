@@ -83,6 +83,8 @@ async def on_ready():
             await ROLES.update_reaction_msg(guild_config.ROLE_CHANNEL, roles_config.EMOTE_ROLES)
         # await ROLES.update_reaction_msg(os.getenv("DISCORD.CHANNEL.ROLE.LIVE"), roles_config.EMOTE_ROLES)
         
+        await delete_old_msgs(bot.get_channel(767819028282343495))
+
     except Exception:
         DB.log("Error: " + traceback.format_exc())
 
@@ -113,14 +115,21 @@ async def check_time():
     channel = bot.get_channel(guild_config.BOT_CHANNEL)
     while True:
         now = datetime.datetime.now()
-        print(now.hour, now.minute)
+        
         if now.hour == 1 and now.minute == 0: # 3 o'clock because of time shift
-            await purge(channel)
+            await delete_old_msgs(channel)
         await asyncio.sleep(60)
 
     
-async def purge(channel):
-    await channel.purge()
+async def delete_old_msgs(channel):
+    now = datetime.datetime.now()
+    date = now - datetime.timedelta(days=1)
+
+    print(date.day, date.hour, date.minute)
+    async for message in channel.history(before=date):
+        print(message.created_at)
+        await message.delete()
+
     await channel.send("Beachten Sie mich nicht, ich putze hier nur.")
 
 
