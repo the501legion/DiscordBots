@@ -92,7 +92,8 @@ async def on_ready():
 @bot.event
 async def on_message(message):
     print("on_message")
-    
+    if message.guild.id != guild_config.SERVER:
+        return
 
     await handle_command(message)
 
