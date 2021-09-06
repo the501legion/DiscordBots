@@ -30,8 +30,8 @@ jobs:
         cp ../../../.env PrincessPaperplane/.
     - name: Run code
       run: |
-        pwd
         echo "Kill current session"
         tmux kill-session -t paperbot-test || true
         echo "Start new session"
-        tmux new-session -d -s paperbot-test 'python3 PrincessPaperplane/paperbot.py -test'
+        tmux new-session paperbot-test
+        python3 PrincessPaperplane/paperbot.py -test
