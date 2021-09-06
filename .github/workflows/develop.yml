@@ -33,5 +33,4 @@ jobs:
         echo "Kill current session"
         tmux kill-session -t paperbot-test || true
         echo "Start new session"
-        tmux new-session paperbot-test
-        python3 PrincessPaperplane/paperbot.py -test
+        exec tmux new-session -d -s paperbot-test 'python3 PrincessPaperplane/paperbot.py -test'
