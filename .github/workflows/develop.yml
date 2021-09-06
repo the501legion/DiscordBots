@@ -30,7 +30,7 @@ jobs:
         cp ../../../.env PrincessPaperplane/.
     - name: Run code
       run: |
-        whoami
+        su nicola
         echo "Kill current session"
         tmux kill-session -t paperbot-test || true
         echo "Start new session"
