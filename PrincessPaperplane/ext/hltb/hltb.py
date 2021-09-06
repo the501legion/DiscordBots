@@ -8,9 +8,9 @@ class HLTB(Cog):
     def __init__(self, bot: Bot):
         self.bot = bot
 
-    @commands.command(name='hltb', aliases=['hl', 'howlong', 'howlongtobeat'])
+    @commands.command(name='hltb', aliases=['hl', 'howlong', 'howlongtobeat'], help="Lookup estimated playtime for a game")
     async def hltb(self, ctx: commands.Context, *, game: str):
-        result_list = await HowLongToBeat().async_search(game)
+        result_list = await HowLongToBeat(0.0).async_search(game, similarity_case_sensitive=False)
         if result_list is not None and len(result_list) > 0:
             g: HowLongToBeatEntry = max(result_list, key=lambda element: element.similarity)
 
