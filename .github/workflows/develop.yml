@@ -22,12 +22,15 @@ jobs:
     - name: Update PIP
       run: |
         python3 -m pip install --upgrade pip
+    - name: Update PIP
+      run: |
+        python3 -m pip install --upgrade pip
     - name: Copy credentials
       run: |
         cp ../../../.env PrincessPaperplane/.
     - name: Run code
       run: |
-        chmod +x run-test.sh
+        tmux ls
         echo "Kill current session"
         tmux kill-session -t paperbot-test || true
         echo "Start new session"
