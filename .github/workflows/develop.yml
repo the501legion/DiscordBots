@@ -28,6 +28,7 @@ jobs:
     - name: Run code
       run: |
         chmod +x run-test.sh
-        echo "Prepare run"
-        ./run-test.sh
-        echo "Finish run"
+        echo "Kill current session"
+        tmux kill-session -t paperbot-test
+        echo "Start new session"
+        tmux new-session -d -s paperbot-test 'python3 PrincessPaperplane/paperbot.py -test'
