@@ -29,6 +29,6 @@ jobs:
       run: |
         chmod +x run-test.sh
         echo "Kill current session"
-        tmux kill-session -t paperbot-test
+        tmux kill-session -t paperbot-test || true
         echo "Start new session"
         tmux new-session -d -s paperbot-test 'python3 PrincessPaperplane/paperbot.py -test'
